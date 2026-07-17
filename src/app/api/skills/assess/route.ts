@@ -19,6 +19,7 @@ const ALLOWED_TYPES = ["image/png", "image/jpeg", "application/pdf"];
 export async function POST(request: Request) {
   try {
     const session = await requireAuth();
+    if (!session.user?.id) return NextResponse.json({ success: false, error: { message: "Unauthorized" } }, { status: 401 });
     const formData = await request.formData();
 
     const skillName = formData.get("skillName") as string;
