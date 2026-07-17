@@ -1,0 +1,26 @@
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: var(--color-on-primary);
+  padding: var(--spacing-md);
+}
+
+.main {
+  width: 100%;
+  max-width: 400px;
+  background-color: var(--color-on-primary);
+  padding: var(--spacing-xl);
+  border-radius: var(--radius-md);
+}
+
+@media (max-width: 768px) {
+  .main {
+    padding-left: var(--spacing-md);
+    padding-right: var(--spacing-md);
+  }
+  :global(.mobile-hide) {
+    display: none;
+  }
+}

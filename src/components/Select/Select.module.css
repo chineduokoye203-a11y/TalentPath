@@ -1,0 +1,17 @@
+.wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.wrapper select {
+  padding-right: calc(var(--spacing-md) + 20px);
+}
+
+.arrow {
+  position: absolute;
+  right: var(--spacing-md);
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: var(--color-on-surface-variant);
+}

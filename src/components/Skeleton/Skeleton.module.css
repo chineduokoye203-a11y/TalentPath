@@ -1,0 +1,33 @@
+.skeleton {
+  background: var(--color-surface-variant);
+  border-radius: var(--radius-sm);
+  animation: pulse 1.5s infinite;
+}
+
+.line {
+  height: 1rem;
+  width: 100%;
+}
+.title {
+  height: 1.5rem;
+  width: 60%;
+}
+.avatar {
+  height: 2.5rem;
+  width: 2.5rem;
+  border-radius: var(--radius-full);
+}
+.card {
+  height: 120px;
+  border-radius: var(--radius-md);
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}

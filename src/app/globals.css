@@ -1,0 +1,73 @@
+/* Global reset and base styles */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+  width: 100%;
+  font-family: "Poppins", sans-serif;
+  background-color: var(--color-surface);
+  color: var(--color-on-surface);
+  line-height: var(--line-height-normal, 1.5);
+  font-size: var(--font-size-body, 16px);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Accessibility: prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+.fieldInput {
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--color-surface-container-low);
+  border: 1px solid var(--color-outline);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: var(--font-size-body);
+  color: var(--color-on-surface);
+  transition: none;
+}
+
+.fieldInput:focus {
+  border-color: var(--color-primary);
+  border-width: 2px;
+  outline: none;
+}
+
+.fieldInput:not(:placeholder-shown) {
+  background: var(--color-inverse-on-surface);
+}
+
+.fieldInput:-webkit-autofill {
+  background: var(--color-inverse-on-surface) !important;
+  -webkit-box-shadow: 0 0 0 1000px var(--color-inverse-on-surface) inset !important;
+  -webkit-text-fill-color: var(--color-on-surface) !important;
+}

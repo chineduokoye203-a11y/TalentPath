@@ -1,0 +1,3 @@
+.hrCard > div:first-child {
+  background-color: var(--color-on-primary);
+}
