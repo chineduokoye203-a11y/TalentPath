@@ -144,14 +144,14 @@ function AuthContent() {
           </Link>
           <h1 className={styles.title}>Login to TalentPath</h1>
           <p className={styles.subtitle}>Welcome back! Please enter your details.</p>
-          <form onSubmit={loginForm.handleSubmit(onLogin)} className={styles.form}>
+          <form onSubmit={loginForm.handleSubmit(onLogin)} className={styles.form} autoComplete="off">
             <Input label="Email" type="email" autoFocus error={loginForm.formState.errors.email?.message} onFocus={() => setServerError(null)} {...loginForm.register("email")} />
             <Input label="Password" type={showLoginPassword ? "text" : "password"} labelRight={<button type="button" onClick={() => switchMode("forgot")} className={authStyles.link} style={{ fontSize: "inherit", color: "var(--color-on-background)" }}>Forgot password?</button>} error={loginForm.formState.errors.password?.message} onFocus={() => setServerError(null)} suffix={<span onClick={() => setShowLoginPassword(!showLoginPassword)} style={{ display: "flex" }}>{showLoginPassword ? <EyeOff size={20} /> : <Eye size={20} />}</span>} {...loginForm.register("password")} />
             <Button type="submit" isLoading={loginForm.formState.isSubmitting} className={styles.submitBtn}>Login</Button>
           </form>
           <p className={styles.footer}>
             Don't have an account?{" "}
-            <button onClick={() => switchMode("register")} className={authStyles.link}>Sign Up</button>
+            <Link href="/auth?mode=register" className={authStyles.link}>Sign Up</Link>
           </p>
         </>
       )}
@@ -236,7 +236,7 @@ function AuthContent() {
 
           <p className={styles.footer}>
             Already have an account?{" "}
-            <button type="button" onClick={() => switchMode("login")} className={authStyles.link}>Login</button>
+            <Link href="/auth?mode=login" className={authStyles.link}>Login</Link>
           </p>
           <p className={styles.footer}><small>Register your company as the HR administrator. Subsequent users must be invited.</small></p>
         </>
