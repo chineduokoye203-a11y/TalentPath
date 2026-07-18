@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { Suspense, useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -145,6 +145,14 @@ function RecommendedCourses() {
 }
 
 export default function DashboardHomePage() {
+  return (
+    <Suspense fallback={<div style={{ padding: "2rem", color: "var(--color-on-surface-variant)" }}>Loading...</div>}>
+      <DashboardHomeContent />
+    </Suspense>
+  );
+}
+
+function DashboardHomeContent() {
   const { data: session } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();

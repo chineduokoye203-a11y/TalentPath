@@ -90,3 +90,7 @@
     padding: var(--spacing-md);
   }
 }
+
+.sidebarFallback {
+  padding: 1rem;
+}

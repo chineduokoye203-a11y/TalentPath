@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { Suspense, useState, useEffect, useCallback, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useForm } from "react-hook-form";
@@ -53,6 +53,14 @@ const levelOptions = [
 ];
 
 export default function SkillsPage() {
+  return (
+    <Suspense fallback={<div style={{ padding: "2rem", color: "var(--color-on-surface-variant)" }}>Loading...</div>}>
+      <SkillsPageContent />
+    </Suspense>
+  );
+}
+
+function SkillsPageContent() {
   const { data: session } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();

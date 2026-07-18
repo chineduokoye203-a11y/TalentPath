@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { Suspense, useState } from "react";
 import { Sidebar } from "@/components/Sidebar/Sidebar";
 import styles from "./layout.module.css";
 import { Menu } from "lucide-react";
@@ -17,7 +17,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       {/* Sidebar */}
       <div className={`${styles.sidebarWrapper} ${isSidebarOpen ? styles.open : ""} ${(session?.user as any)?.role === "HR" ? styles.sidebarHr : ""}`}>
-        <Sidebar onClose={() => setSidebarOpen(false)} />
+        <Suspense fallback={<div className={styles.sidebarFallback} />}>
+          <Sidebar onClose={() => setSidebarOpen(false)} />
+        </Suspense>
       </div>
 
       <div className={styles.mainWrapper}>

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { Suspense, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/Button/Button";
@@ -37,6 +37,14 @@ interface CareerPath {
 }
 
 export default function CareerPathsAdminPage() {
+  return (
+    <Suspense fallback={<div style={{ padding: "2rem", color: "var(--color-on-surface-variant)" }}>Loading...</div>}>
+      <CareerPathsAdminContent />
+    </Suspense>
+  );
+}
+
+function CareerPathsAdminContent() {
   const { data: session } = useSession();
   const role = (session?.user as any)?.role;
   const router = useRouter();
