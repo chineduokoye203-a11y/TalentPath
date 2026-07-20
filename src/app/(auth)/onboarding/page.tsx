@@ -62,37 +62,20 @@ export default function OnboardingPage() {
   const [step, setStep] = useState(0);
   const [serverError, setServerError] = useState<string | null>(null);
   const [inviteSuccess, setInviteSuccess] = useState(false);
-
-  const userRole = (session?.user as any)?.role;
-  const isEmployee = userRole === "EMPLOYEE";
-  const isManager = userRole === "MANAGER";
-  const isSessionLoaded = status !== "loading";
-
-  if (!isSessionLoaded) {
-    return (
-      <div className={styles.container}>
-        <p style={{ color: "var(--color-on-surface-variant)", textAlign: "center" }}>Loading...</p>
-      </div>
-    );
-  }
-
   const [orgForm, setOrgForm] = useState({ name: "", industry: "", size: "" });
   const [orgErrors, setOrgErrors] = useState<Record<string, string>>({});
   const [newDepartments, setNewDepartments] = useState<string[]>([]);
   const [newDepartment, setNewDepartment] = useState("");
   const [inviteForm, setInviteForm] = useState({ fullName: "", email: "", role: "EMPLOYEE", department: "", jobTitle: "" });
   const [inviteErrors, setInviteErrors] = useState<Record<string, string>>({});
-
   const [skills, setSkills] = useState<Array<{ id: string; name: string; category: { name: string } }>>([]);
   const [selectedSkills, setSelectedSkills] = useState<Array<{ skillId: string; level: number }>>([]);
   const [skillErrors, setSkillErrors] = useState<string | null>(null);
   const [skillModalOpen, setSkillModalOpen] = useState(false);
   const [modalSkillName, setModalSkillName] = useState("");
   const [modalSkillLevel, setModalSkillLevel] = useState("3");
-
   const [careerForm, setCareerForm] = useState({ targetRole: "", careerGoal: "" });
   const [careerErrors, setCareerErrors] = useState<Record<string, string>>({});
-
   const [departments, setDepartments] = useState<Department[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [selectedDepartmentId, setSelectedDepartmentId] = useState("");
@@ -101,9 +84,15 @@ export default function OnboardingPage() {
   const [teamErrors, setTeamErrors] = useState<Record<string, string>>({});
   const [teamSaving, setTeamSaving] = useState(false);
 
+  const userRole = (session?.user as any)?.role;
+  const isEmployee = userRole === "EMPLOYEE";
+  const isManager = userRole === "MANAGER";
+  const isSessionLoaded = status !== "loading";
+
   const filteredTeams = teams.filter((t) => t.departmentId === selectedDepartmentId);
 
   useEffect(() => {
+    if (!isSessionLoaded) return;
     if (isEmployee || isManager) {
       fetch("/api/skills")
         .then((res) => res.json())
@@ -142,9 +131,10 @@ export default function OnboardingPage() {
         .then((json) => { if (json.success && json.data?.name) setOrgForm((prev) => ({ ...prev, name: json.data.name })); })
         .catch(() => {});
     }
-  }, [session, isEmployee, isManager]);
+  }, [session, isEmployee, isManager, isSessionLoaded]);
 
   useEffect(() => {
+    if (!isSessionLoaded) return;
     if (isManager && step === 2) {
       fetch("/api/departments")
         .then((res) => res.json())
@@ -155,7 +145,15 @@ export default function OnboardingPage() {
         .then((json) => { if (json.success) setTeams(json.data || []); })
         .catch(() => {});
     }
-  }, [isManager, step]);
+  }, [isManager, step, isSessionLoaded]);
+
+  if (!isSessionLoaded) {
+    return (
+      <div className={styles.container}>
+        <p style={{ color: "var(--color-on-surface-variant)", textAlign: "center" }}>Loading...</p>
+      </div>
+    );
+  }
 
   const updateOrg = (field: string, value: string) => {
     setOrgForm((prev) => ({ ...prev, [field]: value }));
