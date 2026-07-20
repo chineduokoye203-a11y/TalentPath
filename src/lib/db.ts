@@ -1,26 +1,10 @@
 import { PrismaClient } from "@prisma/client";
-import { PrismaLibSql } from "@prisma/adapter-libsql";
-import path from "node:path";
+import { PrismaPg } from "@prisma/adapter-pg";
 
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
 
-function resolveDbUrl(): string {
-  const raw = process.env.DATABASE_URL ?? "file:./dev.db";
-  if (raw.startsWith("file:")) {
-    const filePath = raw.slice("file:".length);
-    return `file:${path.resolve(filePath).replace(/\\/g, "/")}`;
-  }
-  return raw;
-}
-
 function createPrisma() {
-  const config: { url: string; authToken?: string } = {
-    url: resolveDbUrl(),
-  };
-  if (process.env.TURSO_AUTH_TOKEN) {
-    config.authToken = process.env.TURSO_AUTH_TOKEN;
-  }
-  const adapter = new PrismaLibSql(config);
+  const adapter = new PrismaPg(process.env.DATABASE_URL!);
   return new PrismaClient({ adapter });
 }
 
