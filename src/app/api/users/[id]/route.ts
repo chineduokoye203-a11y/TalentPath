@@ -6,7 +6,7 @@ import { NotFoundError } from "@/lib/errors";
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await requireRole(["HR", "ADMINISTRATOR", "MANAGER"]);
+    await requireRole(["HR", "ADMINISTRATOR", "MANAGER", "EMPLOYEE"]);
 
     const { id } = await params;
     const user = await db.user.findUnique({

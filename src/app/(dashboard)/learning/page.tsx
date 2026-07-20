@@ -146,12 +146,11 @@ function CourseCard({ course, enroll }: { course: Course; enroll?: boolean }) {
             style={{
               display: "inline-flex",
               alignItems: "center",
-              padding: "8px 16px",
+              padding: "8px 0",
               color: "var(--color-primary)",
               fontWeight: 500,
               textDecoration: "none",
               fontSize: "var(--font-size-body-sm)",
-              marginLeft: "auto",
             }}
           >
             View on Udemy <ArrowRight size={14} style={{ marginLeft: "4px" }} />

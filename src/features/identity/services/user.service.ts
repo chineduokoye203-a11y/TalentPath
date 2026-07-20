@@ -10,9 +10,10 @@ interface CreateUserFromInviteInput {
   lastName: string;
   password: string;
   role: string;
-  companyId: string;
+  companyId: string | null;
   departmentId?: string | null;
   teamId?: string | null;
+  jobTitle?: string | null;
 }
 
 interface UpdateProfileInput {
@@ -50,6 +51,17 @@ export const userService = {
         teamId: data.teamId || null,
       },
     });
+
+    if (data.jobTitle) {
+      await db.profile.create({
+        data: {
+          userId: user.id,
+          jobTitle: data.jobTitle,
+          yearsOfExperience: 0,
+          careerGoal: "",
+        },
+      });
+    }
 
     await writeAuditLog({
       action: "CREATE",

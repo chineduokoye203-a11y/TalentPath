@@ -12,14 +12,16 @@ import { Card } from "@/components/Card/Card";
 import { Button } from "@/components/Button/Button";
 import { Input } from "@/components/Input/Input";
 import { Select } from "@/components/Select/Select";
+import { Modal } from "@/components/Modal/Modal";
 
+import { enrollInCourseAction } from "@/features/learning/actions/learning.actions";
 import { UserPlus, Users, BookOpen, Map, Compass, ArrowRight, Sparkles } from "lucide-react";
 import dashboardStyles from "./dashboard.module.css";
 
 interface Department { id: string; name: string; }
 interface Team { id: string; name: string; }
 
-const roleOptions = [{ value: "EMPLOYEE", label: "Employee" }, { value: "MANAGER", label: "Line Manager" }, { value: "HR", label: "HR" }];
+const roleOptions = [{ value: "EMPLOYEE", label: "Employee" }, { value: "MANAGER", label: "Line Manager" }];
 
 interface RecommendedCourse {
   id: string;
@@ -32,6 +34,14 @@ interface RecommendedCourse {
   category: string;
   level: string;
   provider: string;
+}
+
+function formatDuration(seconds: number): string {
+  if (!seconds) return "";
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  if (hours > 0) return `${hours}h ${minutes}m`;
+  return `${minutes}m`;
 }
 
 function RecommendedCourses() {
@@ -69,7 +79,7 @@ function RecommendedCourses() {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
+          gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
           gap: "var(--spacing-md)",
         }}
       >
@@ -119,7 +129,7 @@ function RecommendedCourses() {
                 )}
                 {course.duration > 0 && (
                   <span style={{ fontSize: "var(--font-size-body-sm)", color: "var(--color-on-surface-variant)" }}>
-                    {Math.round(course.duration / 60)}h {course.duration % 60 > 0 ? `${course.duration % 60}m` : ""}
+                    {formatDuration(course.duration)}
                   </span>
                 )}
               </div>
@@ -128,14 +138,47 @@ function RecommendedCourses() {
                   {course.description}
                 </p>
               )}
-              <a
-                href={course.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ display: "inline-flex", alignItems: "center", padding: "8px 16px", color: "var(--color-primary)", fontWeight: 500, textDecoration: "none", fontSize: "var(--font-size-body-sm)", marginLeft: "auto" }}
-              >
-                View on Udemy <ArrowRight size={14} style={{ marginLeft: "4px" }} />
-              </a>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <form action={enrollInCourseAction} style={{ margin: 0, padding: 0 }}>
+                  <input type="hidden" name="courseId" value={course.id} />
+                  <input type="hidden" name="courseTitle" value={course.title} />
+                  <input type="hidden" name="courseDescription" value={course.description} />
+                  <input type="hidden" name="courseUrl" value={course.url} />
+                  <input type="hidden" name="courseProvider" value={course.provider ?? ""} />
+                  <input type="hidden" name="courseImageUrl" value={course.imageUrl ?? ""} />
+                  <input type="hidden" name="courseInstructor" value={course.instructor ?? ""} />
+                  <input type="hidden" name="courseDuration" value={String(course.duration)} />
+                  <input type="hidden" name="courseCategory" value={course.category} />
+                  <input type="hidden" name="courseLevel" value={course.level} />
+                  <button
+                    type="submit"
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      padding: "8px 16px",
+                      background: "var(--color-primary)",
+                      color: "var(--color-on-primary)",
+                      border: "none",
+                      borderRadius: "var(--radius-sm)",
+                      fontWeight: "var(--font-weight-medium)",
+                      fontSize: "var(--font-size-body-sm)",
+                      cursor: "pointer",
+                      transition: "all 150ms ease",
+                    }}
+                  >
+                    Enroll
+                  </button>
+                </form>
+                <a
+                  href={course.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ display: "inline-flex", alignItems: "center", padding: "8px 0", color: "var(--color-primary)", fontWeight: 500, textDecoration: "none", fontSize: "var(--font-size-body-sm)" }}
+                >
+                  View on Udemy <ArrowRight size={14} style={{ marginLeft: "4px" }} />
+                </a>
+              </div>
             </div>
           </div>
         ))}
@@ -153,20 +196,19 @@ export default function DashboardHomePage() {
 }
 
 function DashboardHomeContent() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const showInvitePage = searchParams.has("invite");
-
   useEffect(() => {
-    if (!session) router.push("/auth?mode=login");
-  }, [session, router]);
+    if (status === "unauthenticated") router.push("/auth?mode=login");
+  }, [status, router]);
 
   const role = (session?.user as any)?.role;
   const rawName = session?.user?.name || "User";
   const name = role === "HR" ? rawName.charAt(0).toUpperCase() + rawName.slice(1).toLowerCase() : rawName;
 
   const [serverError, setServerError] = useState<string | null>(null);
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [inviteSuccess, setInviteSuccess] = useState(false);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
 
@@ -194,8 +236,15 @@ function DashboardHomeContent() {
       });
       const json = await res.json();
       if (json.success) {
-        router.replace("/dashboard");
         reset();
+        setShowInviteModal(false);
+        setTimeout(() => {
+          setInviteSuccess(true);
+          setTimeout(() => {
+            setInviteSuccess(false);
+            router.push("/admin/invitations");
+          }, 10000);
+        }, 300);
       } else {
         setServerError(json.error?.message || "Failed to create invitation");
       }
@@ -204,95 +253,88 @@ function DashboardHomeContent() {
     }
   };
 
-  const openInvitePage = () => router.push("/dashboard?invite=1");
-  const closeInvitePage = () => router.push("/dashboard");
-
   if (!session) return null;
 
   if (role === "HR") {
     return (
       <div>
-        {showInvitePage ? (
-          <>
-            <PageHeader
-              title="New User Invitation"
-              description="Invite a new user to the platform. They will receive an email with an activation link."
-            />
+        <PageHeader
+          title={`Welcome back, ${name}`}
+          description="Manage your workforce and develop talent."
+          action={
+            <Button onClick={() => setShowInviteModal(true)}>
+              <UserPlus size={16} style={{ marginRight: "var(--spacing-xs)" }} /> Invite New Users
+            </Button>
+          }
+        />
 
-            <Card>
-              {serverError && <div style={{ color: "var(--color-error)", marginBottom: "var(--spacing-sm)" }}>{serverError}</div>}
-              <form onSubmit={handleSubmit(onSubmit)} style={{ display: "flex", flexDirection: "column", gap: "var(--spacing-md)" }}>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--spacing-md)" }}>
-                  <Input label="First Name" error={errors.firstName?.message} {...register("firstName")} />
-                  <Input label="Last Name" error={errors.lastName?.message} {...register("lastName")} />
-                </div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--spacing-md)" }}>
-                  <Input label="Work Email" type="email" error={errors.email?.message} {...register("email")} />
-                  <Select label="Role" error={errors.role?.message} options={roleOptions} {...register("role")} />
-                </div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--spacing-md)" }}>
-                  <Select label="Department" options={departments.map((d) => ({ label: d.name, value: d.id }))} {...register("departmentId")} />
-                  <Input label="Job Title" {...register("jobTitle")} />
-                </div>
-                <div style={{ display: "flex", gap: "var(--spacing-sm)", justifyContent: "flex-end", marginTop: "var(--spacing-md)" }}>
-                  <Button variant="secondary" type="button" onClick={closeInvitePage}>Cancel</Button>
-                  <Button type="submit" isLoading={isSubmitting}>Send Invitation</Button>
-                </div>
-              </form>
-            </Card>
-          </>
-        ) : (
-          <>
-            <PageHeader
-              title={`Welcome back, ${name}`}
-              description="Manage your workforce and develop talent."
-              action={
-                <Button onClick={openInvitePage}>
-                  <UserPlus size={16} style={{ marginRight: "var(--spacing-xs)" }} /> Invite New Users
-                </Button>
-              }
-            />
-
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
-                gap: "1.5rem",
-              }}
-            >
-              <Card title="Invite Users" className={dashboardStyles.hrCard}>
-                <div style={{ padding: "1rem 0" }}>
-                  <p style={{ marginBottom: "1rem" }}>Bring your team members onboard to start building your talent pool.</p>
-                  <Button onClick={openInvitePage}>
-                    <UserPlus size={16} style={{ marginRight: "var(--spacing-xs)" }} /> Invite New Users
-                  </Button>
-                </div>
-              </Card>
-
-              <Card title="Workforce Overview" className={dashboardStyles.hrCard}>
-                <div style={{ padding: "1rem 0" }}>
-                  <p style={{ marginBottom: "1rem" }}>View skills, gaps, and development across your entire organization.</p>
-                  <Link href="/workforce" style={{ color: "var(--color-primary)", fontWeight: "var(--font-weight-semibold)", display: "inline-flex", alignItems: "center", gap: "var(--spacing-xs)" }}>
-                    View Workforce Analytics <ArrowRight size={16} />
-                  </Link>
-                </div>
-              </Card>
-
-              <Card title="Team Skills" className={dashboardStyles.hrCard}>
-                <div style={{ padding: "1rem 0" }}>
-                  <p style={{ marginBottom: "1rem" }}>Track skill development and identify gaps across teams.</p>
-                  <Link href="/skills" style={{ color: "var(--color-primary)", fontWeight: "var(--font-weight-semibold)", display: "inline-flex", alignItems: "center", gap: "var(--spacing-xs)" }}>
-                    Manage Skills <ArrowRight size={16} />
-                  </Link>
-                </div>
-              </Card>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
+            gap: "1.5rem",
+          }}
+        >
+          <Card title="Invite Users" className={dashboardStyles.hrCard}>
+            <div style={{ padding: "1rem 0" }}>
+              <p style={{ marginBottom: "1rem" }}>Bring your team members onboard to start building your talent pool.</p>
+              <Button onClick={() => setShowInviteModal(true)}>
+                <UserPlus size={16} style={{ marginRight: "var(--spacing-xs)" }} /> Invite New Users
+              </Button>
             </div>
+          </Card>
 
-            <div style={{ marginTop: "1.5rem" }}>
-              <RecommendedCourses />
+          <Card title="Workforce Overview" className={dashboardStyles.hrCard}>
+            <div style={{ padding: "1rem 0" }}>
+              <p style={{ marginBottom: "1rem" }}>View skills, gaps, and development across your entire organization.</p>
+              <Link href="/workforce" style={{ color: "var(--color-primary)", fontWeight: "var(--font-weight-semibold)", display: "inline-flex", alignItems: "center", gap: "var(--spacing-xs)" }}>
+                View Workforce Analytics <ArrowRight size={16} />
+              </Link>
             </div>
-          </>
-        )}
+          </Card>
+
+          <Card title="Team Skills" className={dashboardStyles.hrCard}>
+            <div style={{ padding: "1rem 0" }}>
+              <p style={{ marginBottom: "1rem" }}>Track skill development and identify gaps across teams.</p>
+              <Link href="/team" style={{ color: "var(--color-primary)", fontWeight: "var(--font-weight-semibold)", display: "inline-flex", alignItems: "center", gap: "var(--spacing-xs)" }}>
+                Manage Skills <ArrowRight size={16} />
+              </Link>
+            </div>
+          </Card>
+        </div>
+
+        <div style={{ marginTop: "1.5rem" }}>
+          <RecommendedCourses />
+        </div>
+
+        <Modal isOpen={showInviteModal} onClose={() => { setShowInviteModal(false); setServerError(null); }} title="Create Invitation" size="lg">
+          {serverError && <div style={{ color: "var(--color-error)", marginBottom: "var(--spacing-sm)" }}>{serverError}</div>}
+          <form onSubmit={handleSubmit(onSubmit)} style={{ display: "flex", flexDirection: "column", gap: "var(--spacing-md)" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--spacing-md)" }}>
+              <Input label="First Name" error={errors.firstName?.message} {...register("firstName")} />
+              <Input label="Last Name" error={errors.lastName?.message} {...register("lastName")} />
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--spacing-md)" }}>
+              <Input label="Work Email" type="email" error={errors.email?.message} {...register("email")} />
+              <Select label="Role" error={errors.role?.message} options={roleOptions} {...register("role")} />
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--spacing-md)" }}>
+              <Select label="Department" options={departments.map((d) => ({ label: d.name, value: d.id }))} {...register("departmentId")} />
+              <Input label="Job Title" {...register("jobTitle")} />
+            </div>
+            <div style={{ display: "flex", gap: "var(--spacing-sm)", justifyContent: "flex-end", marginTop: "var(--spacing-md)" }}>
+              <Button variant="secondary" type="button" onClick={() => { setShowInviteModal(false); setServerError(null); }}>Cancel</Button>
+              <Button type="submit" isLoading={isSubmitting}>Send Invitation</Button>
+            </div>
+          </form>
+        </Modal>
+
+        <Modal isOpen={inviteSuccess} onClose={() => { setInviteSuccess(false); router.push("/admin/invitations"); }} title="Invitation Sent" size="sm">
+          <div style={{ textAlign: "center", padding: "var(--spacing-md) 0" }}>
+            <p style={{ margin: 0, fontSize: "var(--font-size-body)", color: "var(--color-on-surface)" }}>User has been invited successfully.</p>
+            <p style={{ margin: "var(--spacing-sm) 0 0 0", fontSize: "var(--font-size-body-sm)", color: "var(--color-on-surface-variant)" }}>Redirecting to invitations page...</p>
+          </div>
+        </Modal>
       </div>
     );
   }

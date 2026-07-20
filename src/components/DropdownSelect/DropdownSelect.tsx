@@ -10,9 +10,10 @@ interface DropdownSelectProps {
   onChange: (value: string) => void;
   required?: boolean;
   error?: string;
+  disabled?: boolean;
 }
 
-export function DropdownSelect({ label, options, value, onChange, required = true, error }: DropdownSelectProps) {
+export function DropdownSelect({ label, options, value, onChange, required = true, error, disabled }: DropdownSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -29,14 +30,15 @@ export function DropdownSelect({ label, options, value, onChange, required = tru
   const selected = options.find((o) => o.value === value);
 
   return (
-    <div className={styles.container} ref={ref}>
+    <div className={`${styles.container} ${disabled ? styles.disabled : ""}`} ref={ref}>
       <label className={styles.label}>
         {label} {required && <span className={styles.required}>*</span>}
       </label>
       <button
         type="button"
         className={`${styles.trigger} ${isOpen ? styles.triggerOpen : ""} ${error ? styles.hasError : ""}`}
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => !disabled && setIsOpen(!isOpen)}
+        disabled={disabled}
       >
         <span className={value ? styles.triggerText : styles.placeholder}>
           {selected?.label || "Select an option"}
@@ -46,7 +48,7 @@ export function DropdownSelect({ label, options, value, onChange, required = tru
         </svg>
       </button>
       {error && <span className={styles.error}>{error}</span>}
-      {isOpen && (
+      {isOpen && !disabled && (
         <ul className={styles.menu} role="listbox">
           {options.map((opt) => (
             <li

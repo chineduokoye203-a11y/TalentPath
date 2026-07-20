@@ -4,8 +4,9 @@ import { opportunityService } from "@/features/opportunities/services/opportunit
 
 export async function GET() {
   try {
-    await requireAuth();
-    const opportunities = await opportunityService.getOpenOpportunities();
+    const session = await requireAuth();
+    const userId = (session.user as { id: string }).id;
+    const opportunities = await opportunityService.getOpenOpportunities(userId);
     return NextResponse.json({ success: true, data: opportunities });
   } catch (error: any) {
     return NextResponse.json(

@@ -93,10 +93,12 @@ function ProgressBar({ value }: { value: number }) {
   return (
     <div
       style={{
-        width: "100%",
-        height: 8,
+        flex: 1,
+        height: 22,
         borderRadius: "var(--radius-full)",
-        background: "var(--color-outline-variant)",
+        background: "var(--color-on-primary)",
+        border: "1px solid var(--color-outline-variant)",
+        position: "relative",
         overflow: "hidden",
       }}
     >
@@ -112,8 +114,40 @@ function ProgressBar({ value }: { value: number }) {
                 ? "var(--color-primary)"
                 : "var(--color-warning)",
           transition: "width 300ms ease",
+          display: "flex",
+          alignItems: "center",
         }}
-      />
+      >
+        {value > 15 && (
+          <span
+            style={{
+              fontSize: 11,
+              fontWeight: "var(--font-weight-semibold)",
+              color: "#fff",
+              lineHeight: 1,
+              paddingLeft: 8,
+            }}
+          >
+            {value}%
+          </span>
+        )}
+      </div>
+      {value <= 15 && (
+        <span
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: 8,
+            transform: "translateY(-50%)",
+            fontSize: 11,
+            fontWeight: "var(--font-weight-semibold)",
+            color: "var(--color-on-surface-variant)",
+            lineHeight: 1,
+          }}
+        >
+          {value}%
+        </span>
+      )}
     </div>
   );
 }
@@ -191,7 +225,7 @@ export default function TeamPage() {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
+          gridTemplateColumns: "repeat(4, 1fr)",
           gap: "1rem",
           marginBottom: "2rem",
         }}
@@ -253,7 +287,7 @@ export default function TeamPage() {
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
           style={{
-            padding: "10px 16px",
+            padding: "10px 36px 10px 16px",
             border: "1px solid var(--color-outline-variant)",
             borderRadius: "var(--radius-sm)",
             fontSize: "var(--font-size-body)",
@@ -351,7 +385,7 @@ export default function TeamPage() {
                       fontSize: "var(--font-size-body-sm)",
                     }}
                   >
-                    {member.role}
+                    {member.role === "MANAGER" ? "Line Manager" : member.role.charAt(0) + member.role.slice(1).toLowerCase()}
                   </span>
 
                   <span
@@ -368,17 +402,6 @@ export default function TeamPage() {
                       <div style={{ flex: 1 }}>
                         <ProgressBar value={member.learningProgress} />
                       </div>
-                      <span
-                        style={{
-                          fontSize: "var(--font-size-body-sm)",
-                          fontWeight: "var(--font-weight-medium)",
-                          color: "var(--color-on-surface)",
-                          minWidth: 36,
-                          textAlign: "right",
-                        }}
-                      >
-                        {member.learningProgress}%
-                      </span>
                     </div>
                   </div>
 

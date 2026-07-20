@@ -29,7 +29,7 @@ interface Invitation {
 
 interface Department { id: string; name: string; }
 
-const roleOptions = [{ value: "EMPLOYEE", label: "Employee" }, { value: "MANAGER", label: "Line Manager" }, { value: "LEADERSHIP", label: "Leadership" }];
+const roleOptions = [{ value: "EMPLOYEE", label: "Employee" }, { value: "MANAGER", label: "Line Manager" }];
 const statusBadgeVariant: Record<string, "primary" | "neutral" | "success" | "warning" | "danger"> = {
   PENDING: "warning",
   ACCEPTED: "success",
@@ -145,12 +145,12 @@ export default function InvitationsPage() {
               </tr>
             </thead>
             <tbody>
-              {invitations.map((inv) => (
+                  {invitations.map((inv) => (
                 <tr key={inv.id}>
                   <td>{inv.firstName} {inv.lastName}</td>
                   <td>{inv.email}</td>
-                  <td>{inv.role}</td>
-                  <td><Badge variant={inv.status === "PENDING" ? "neutral" : statusBadgeVariant[inv.status] || "neutral"} style={inv.status === "PENDING" ? { background: "var(--color-surface-dim)" } : undefined}>{inv.status}</Badge></td>
+                  <td>{inv.role === "MANAGER" ? "Line Manager" : inv.role.charAt(0) + inv.role.slice(1).toLowerCase()}</td>
+                  <td><Badge variant={inv.status === "PENDING" ? "neutral" : statusBadgeVariant[inv.status] || "neutral"} style={inv.status === "PENDING" ? { background: "var(--color-surface-dim)" } : undefined}>{inv.status.charAt(0) + inv.status.slice(1).toLowerCase()}</Badge></td>
                   <td>{new Date(inv.expiresAt).toLocaleDateString()}</td>
                   <td>{inv.status === "PENDING" && (
                     <Button size="sm" variant="danger" onClick={() => setRevokingId(inv.id)}>Revoke</Button>

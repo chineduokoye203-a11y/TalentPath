@@ -14,3 +14,7 @@
   border-color: var(--color-primary);
   border-width: 2px;
 }
+
+.searchInput:not(:placeholder-shown) {
+  background: var(--color-surface);
+}

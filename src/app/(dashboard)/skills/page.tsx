@@ -61,14 +61,14 @@ export default function SkillsPage() {
 }
 
 function SkillsPageContent() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
   const showAdd = searchParams.has("add");
 
   useEffect(() => {
-    if (!session) router.push("/auth?mode=login");
-  }, [session, router]);
+    if (status === "unauthenticated") router.push("/auth?mode=login");
+  }, [status, router]);
 
   const [mySkills, setMySkills] = useState<EmployeeSkill[]>([]);
   const [allSkills, setAllSkills] = useState<Skill[]>([]);

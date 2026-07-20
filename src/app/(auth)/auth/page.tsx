@@ -131,11 +131,10 @@ function AuthContent() {
 
   return (
     <div className={styles.container}>
-          {serverError && mode !== "login" && mode !== "forgot" && mode !== "reset" && <div className={styles.errorAlert}>{serverError}</div>}
+          {serverError && <div className={styles.errorAlert}>{serverError}</div>}
 
       {mode === "login" && (
         <>
-          {serverError && <div style={{ background: "var(--color-error)", color: "var(--color-on-error)", padding: "var(--spacing-sm) var(--spacing-md)", borderRadius: "var(--radius-sm)", textAlign: "center", fontSize: "var(--font-size-body-sm)", marginBottom: "var(--spacing-md)", width: "100%" }}>{serverError}</div>}
           <Link href="/" className={authStyles.logo}>
             <div className={authStyles.logoIcon}>
               <Path size={20} weight="fill" />
@@ -151,7 +150,7 @@ function AuthContent() {
           </form>
           <p className={styles.footer}>
             Don't have an account?{" "}
-            <Link href="/auth?mode=register" className={authStyles.link}>Sign Up</Link>
+            <button type="button" onMouseDown={(e) => { e.preventDefault(); switchMode("register"); }} className={authStyles.link}>Sign Up</button>
           </p>
         </>
       )}
@@ -166,14 +165,13 @@ function AuthContent() {
           </Link>
           <h1 className={styles.title}>Forgot Password</h1>
           <p className={styles.subtitle}>Enter your email address and we'll send you a reset link.</p>
-          {serverError && <div style={{ background: "var(--color-error)", color: "var(--color-on-error)", padding: "var(--spacing-sm) var(--spacing-md)", borderRadius: "var(--radius-sm)", textAlign: "center", fontSize: "var(--font-size-body-sm)", marginBottom: "var(--spacing-md)", width: "100%" }}>{serverError}</div>}
           <form onSubmit={(e) => { e.preventDefault(); setServerError(null); const form = new FormData(e.currentTarget); fetch("/api/auth/forgot-password", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: form.get("email") }) }).then(r => r.json()).then(d => { if (d.success) { switchMode("login"); } else { setServerError(d.error?.message || "Something went wrong"); } }).catch(() => setServerError("Network error. Please try again.")); }} className={styles.form}>
             <Input label="Email" type="email" name="email" autoFocus />
             <Button type="submit" className={styles.submitBtn}>Send Reset Link</Button>
           </form>
           <p className={styles.footer}>
             Remember your password?{" "}
-            <button onClick={() => switchMode("login")} className={authStyles.link}>Login</button>
+            <button type="button" onMouseDown={(e) => { e.preventDefault(); switchMode("login"); }} className={authStyles.link}>Login</button>
           </p>
         </>
       )}
@@ -188,14 +186,13 @@ function AuthContent() {
           </Link>
           <h1 className={styles.title}>Reset Password</h1>
           <p className={styles.subtitle}>Enter your new password below.</p>
-          {serverError && <div style={{ background: "var(--color-error)", color: "var(--color-on-error)", padding: "var(--spacing-sm) var(--spacing-md)", borderRadius: "var(--radius-sm)", textAlign: "center", fontSize: "var(--font-size-body-sm)", marginBottom: "var(--spacing-md)", width: "100%" }}>{serverError}</div>}
           <form onSubmit={(e) => { e.preventDefault(); setServerError(null); const form = new FormData(e.currentTarget); const token = new URLSearchParams(window.location.search).get("token"); fetch("/api/auth/reset-password", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token, password: form.get("password"), confirmPassword: form.get("confirmPassword") }) }).then(r => r.json()).then(d => { if (d.success) { switchMode("login"); } else { setServerError(d.error?.message || "Something went wrong"); } }).catch(() => setServerError("Network error. Please try again.")); }} className={styles.form}>
             <Input label="New Password" type="password" name="password" autoFocus />
             <Input label="Confirm Password" type="password" name="confirmPassword" />
             <Button type="submit" className={styles.submitBtn}>Reset Password</Button>
           </form>
           <p className={styles.footer}>
-            <button onClick={() => switchMode("login")} className={authStyles.link}>Back to Login</button>
+            <button type="button" onMouseDown={(e) => { e.preventDefault(); switchMode("login"); }} className={authStyles.link}>Back to Login</button>
           </p>
         </>
       )}
@@ -236,7 +233,7 @@ function AuthContent() {
 
           <p className={styles.footer}>
             Already have an account?{" "}
-            <Link href="/auth?mode=login" className={authStyles.link}>Login</Link>
+            <button type="button" onMouseDown={(e) => { e.preventDefault(); switchMode("login"); }} className={authStyles.link}>Login</button>
           </p>
           <p className={styles.footer}><small>Register your company as the HR administrator. Subsequent users must be invited.</small></p>
         </>

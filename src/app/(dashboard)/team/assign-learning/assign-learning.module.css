@@ -14,3 +14,7 @@
   border-color: hsl(9, 81%, 46%);
   border-width: 2px;
 }
+
+.searchInput:not(:placeholder-shown) {
+  background: var(--color-surface);
+}

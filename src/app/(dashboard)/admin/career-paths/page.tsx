@@ -165,7 +165,11 @@ function CareerPathsAdminContent() {
     setRoleExperience(String(role.experienceYears ?? 0));
     setRoleLeadership(String(role.leadershipRequired));
     setRoleError(null);
-    setRoleSkills(role.requiredSkills ?? []);
+    setRoleSkills((role.requiredSkills ?? []).map((rs: any) => ({
+      skillId: rs.skillId,
+      skillName: (rs as any).skillName ?? (rs as any).skill?.name ?? "",
+      requiredLevel: rs.requiredLevel,
+    })));
     setSkillNameInput("");
     setSkillLevelInput("3");
     setShowRoleModal(true);
@@ -336,7 +340,13 @@ function CareerPathsAdminContent() {
         <div style={{ display: "flex", flexDirection: "column", gap: "var(--spacing-md)" }}>
           <Input label="Title" value={roleTitle} onChange={(e) => setRoleTitle(e.target.value)} />
           <Select label="Level" value={roleLevel} onChange={(e) => setRoleLevel(e.target.value)} options={roleOptions} />
-          <Input label="Experience Years (optional)" type="number" value={roleExperience} onChange={(e) => setRoleExperience(e.target.value)} />
+          <Select label="Experience Years (optional)" value={roleExperience} onChange={(e) => setRoleExperience(e.target.value)} options={[
+            { label: "0-1", value: "0" },
+            { label: "2-4", value: "2" },
+            { label: "3-5", value: "3" },
+            { label: "5-7", value: "5" },
+            { label: "7+", value: "7" },
+          ]} placeholder="Select experience" />
           <Select label="Leadership Required" value={roleLeadership} onChange={(e) => setRoleLeadership(e.target.value)} options={[{ label: "No", value: "false" }, { label: "Yes", value: "true" }]} />
 
           <div>

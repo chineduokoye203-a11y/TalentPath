@@ -58,11 +58,11 @@ export async function POST(req: Request) {
     if (data.departments && data.departments.length > 0) {
       for (const deptName of data.departments) {
         const existing = await db.department.findFirst({
-          where: { name: deptName },
+          where: { name: deptName, companyId: user.companyId },
         });
         if (!existing) {
           await db.department.create({
-            data: { name: deptName },
+            data: { companyId: user.companyId, name: deptName },
           });
         }
       }

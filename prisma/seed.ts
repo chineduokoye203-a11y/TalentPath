@@ -1,6 +1,11 @@
 import { PrismaClient } from "@prisma/client";
+import { PrismaLibSql } from "@prisma/adapter-libsql";
 
-const db = new PrismaClient();
+const adapter = new PrismaLibSql({
+  url: process.env.DATABASE_URL ?? "file:./dev.db",
+});
+
+const db = new PrismaClient({ adapter });
 
 async function main() {
   console.log("Seeding database...");
@@ -19,18 +24,21 @@ async function main() {
   await db.user.deleteMany();
   await db.role.deleteMany();
   await db.team.deleteMany();
+  await db.company.deleteMany();
   await db.department.deleteMany();
 
+  const seedCompany = await db.company.create({ data: { name: "TalentPath Inc" } });
+
   const engineering = await db.department.create({
-    data: { name: "Engineering", description: "Product engineering team" },
+    data: { companyId: seedCompany.id, name: "Engineering", description: "Product engineering team" },
   });
 
   const design = await db.department.create({
-    data: { name: "Design", description: "Product design team" },
+    data: { companyId: seedCompany.id, name: "Design", description: "Product design team" },
   });
 
   const hr = await db.department.create({
-    data: { name: "Human Resources", description: "HR department" },
+    data: { companyId: seedCompany.id, name: "Human Resources", description: "HR department" },
   });
 
   await db.team.create({
@@ -63,6 +71,7 @@ async function main() {
       name: "Admin User",
       passwordHash: "$2b$12$placeholder_hash_change_me",
       role: "ADMINISTRATOR",
+      companyId: seedCompany.id,
       departmentId: engineering.id,
     },
   });

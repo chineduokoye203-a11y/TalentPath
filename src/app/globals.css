@@ -44,6 +44,38 @@ textarea {
   font-family: inherit;
 }
 
+:where(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="submit"]):not([type="reset"]):not([type="button"]),
+select,
+textarea) {
+  background: var(--color-surface-container-low);
+  border: 1px solid var(--color-outline);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: var(--font-size-body);
+  color: var(--color-on-surface);
+  transition: none;
+}
+
+:where(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="submit"]):not([type="reset"]):not([type="button"])):focus,
+:where(select):focus,
+:where(textarea):focus {
+  border-color: var(--color-primary);
+  border-width: 2px;
+  outline: none;
+}
+
+:where(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="submit"]):not([type="reset"]):not([type="button"])):not(:placeholder-shown),
+:where(textarea):not(:placeholder-shown) {
+  background: var(--color-inverse-on-surface);
+}
+
+:where(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="submit"]):not([type="reset"]):not([type="button"])):-webkit-autofill,
+:where(textarea):-webkit-autofill {
+  background: var(--color-inverse-on-surface) !important;
+  -webkit-box-shadow: 0 0 0 1000px var(--color-inverse-on-surface) inset !important;
+  -webkit-text-fill-color: var(--color-on-surface) !important;
+}
+
 .fieldInput {
   width: 100%;
   box-sizing: border-box;

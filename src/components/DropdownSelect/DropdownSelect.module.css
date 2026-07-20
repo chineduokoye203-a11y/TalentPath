@@ -6,6 +6,11 @@
   position: relative;
 }
 
+.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
 .label {
   font-size: var(--font-size-body-sm);
   color: var(--color-on-surface);

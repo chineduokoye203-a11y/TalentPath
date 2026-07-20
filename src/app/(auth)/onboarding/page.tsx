@@ -58,7 +58,7 @@ interface Team {
 
 export default function OnboardingPage() {
   const router = useRouter();
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [step, setStep] = useState(0);
   const [serverError, setServerError] = useState<string | null>(null);
   const [inviteSuccess, setInviteSuccess] = useState(false);
@@ -66,6 +66,15 @@ export default function OnboardingPage() {
   const userRole = (session?.user as any)?.role;
   const isEmployee = userRole === "EMPLOYEE";
   const isManager = userRole === "MANAGER";
+  const isSessionLoaded = status !== "loading";
+
+  if (!isSessionLoaded) {
+    return (
+      <div className={styles.container}>
+        <p style={{ color: "var(--color-on-surface-variant)", textAlign: "center" }}>Loading...</p>
+      </div>
+    );
+  }
 
   const [orgForm, setOrgForm] = useState({ name: "", industry: "", size: "" });
   const [orgErrors, setOrgErrors] = useState<Record<string, string>>({});
@@ -100,6 +109,12 @@ export default function OnboardingPage() {
         .then((res) => res.json())
         .then((json) => { if (json.success) setSkills(json.data?.skills || []); })
         .catch(() => {});
+      if (isEmployee) {
+        fetch("/api/departments")
+          .then((res) => res.json())
+          .then((json) => { if (json.success) setDepartments(json.data || []); })
+          .catch(() => {});
+      }
       if (isManager) {
         const userId = (session?.user as any)?.id;
         if (userId) {
@@ -247,10 +262,6 @@ export default function OnboardingPage() {
     setServerError(null);
     setSkillErrors(null);
     const validSkills = selectedSkills.filter((s) => s.skillId);
-    if (validSkills.length === 0) {
-      setSkillErrors("Please add at least one skill");
-      return;
-    }
     try {
       const res = await fetch("/api/onboarding/skills", {
         method: "POST",
@@ -293,7 +304,7 @@ export default function OnboardingPage() {
         body: JSON.stringify(careerForm),
       });
       const json = await res.json();
-      if (json.success) setStep(4);
+      if (json.success) setStep(2);
       else setServerError(json.error?.message || "Failed to save career goals");
     } catch {
       setServerError("An error occurred. Please try again.");
@@ -324,7 +335,7 @@ export default function OnboardingPage() {
     }
   };
 
-  const totalSteps = isManager ? 3 : isEmployee ? 3 : 3;
+  const totalSteps = 3;
 
   const departmentOptions = [
     ...departments.map((d) => ({ label: d.name, value: d.id })),
@@ -366,6 +377,7 @@ export default function OnboardingPage() {
             }
           }
         `}</style>
+        {serverError && <div className={styles.errorAlert}>{serverError}</div>}
         <div className={authStyles.logo}>
           <div className={authStyles.logoIcon}>
             <Path size={20} weight="fill" />
@@ -376,9 +388,9 @@ export default function OnboardingPage() {
         <div style={{ marginBottom: "var(--spacing-lg)", display: "flex", alignItems: "center", justifyContent: "center", gap: "0" }}>
           {[1, 2, 3].map((s) => {
             const completed = isManager
-              ? step > s - 1
+              ? step > s - 1 || (s === 3 && step === 2)
               : isEmployee
-                ? step > s - 1 || (s === 3 && step === 2)
+                ? step > s - 1
                 : step > s - 1 || (s === 3 && step === 2 && inviteSuccess);
             const active = isManager
               ? step >= s - 1
@@ -394,12 +406,10 @@ export default function OnboardingPage() {
           })}
         </div>
 
-        {serverError && <div className={styles.errorAlert}>{serverError}</div>}
-
         {/* Step 0: Welcome */}
         {!isEmployee && !isManager && step === 0 && (
           <>
-            <h1 className={styles.title}>Build a Future-Ready Workforce</h1>
+            <h1 className={styles.title}>Welcome to TalentPath!</h1>
             <p className={styles.subtitle}>Identify skill gaps, develop people, track progress, and build leadership pipelines for lasting success.</p>
             <Button onClick={() => setStep(1)} className={styles.submitBtn}>Let's Get Started</Button>
             <button type="button" onClick={() => router.push("/dashboard")} className={`${onboardingStyles.skipLink} ${onboardingStyles.skipOnboarding}`}>Skip Onboarding</button>
@@ -409,7 +419,7 @@ export default function OnboardingPage() {
         {(isEmployee || isManager) && step === 0 && (
           <>
             <h1 className={styles.title}>Welcome to TalentPath!</h1>
-            <p className={styles.subtitle}>{isManager ? "Let's set up your profile and start developing your team's potential." : "Showcase your skills and begin your\u00A0career growth journey."}</p>
+            <p className={styles.subtitle}>{isManager ? "You're all set to support your team's learning, development, and career growth." : "Showcase your skills and begin your\u00A0career growth journey."}</p>
             <Button onClick={() => setStep(1)} className={styles.submitBtn}>{isManager ? "Let's Get Started" : "Get Started"}</Button>
             <button type="button" onClick={() => router.push("/dashboard")} className={`${onboardingStyles.skipLink} ${onboardingStyles.skipOnboarding}`}>Skip Onboarding</button>
           </>
@@ -494,29 +504,63 @@ export default function OnboardingPage() {
           </>
         )}
 
-        {/* Step 1: Add Skills (Employee & Manager) */}
-        {(isEmployee || isManager) && step === 1 && (
+        {/* Step 1: Set Career Goals (Employee only) */}
+        {isEmployee && step === 1 && (
+          <>
+            <h1 className={styles.title}>Set Career Goals</h1>
+            <p className={`${styles.subtitle} ${onboardingStyles.hideMobile}`}>Define where you want to go in your career.</p>
+            <div className={styles.form}>
+              <Input label="Target Role" value={careerForm.targetRole} onChange={(e) => updateCareer("targetRole", e.target.value)} placeholder="e.g., Senior Software Engineer" error={careerErrors.targetRole} />
+              <DropdownSelect label="Primary Career Goal" options={careerGoals} value={careerForm.careerGoal} onChange={(v) => updateCareer("careerGoal", v)} error={careerErrors.careerGoal} />
+              <Button onClick={handleCareerSubmit} className={styles.submitBtn}>Save & Continue</Button>
+              <div style={{ display: "flex", justifyContent: "space-between", marginLeft: "calc(-1 * var(--spacing-md))", width: "calc(100% + var(--spacing-md) * 2)", marginTop: "-8px" }}>
+                <button type="button" onClick={() => setStep(0)} className={onboardingStyles.skipLink} style={{ textAlign: "left", padding: 0, width: "auto" }}>Go Back</button>
+                <button type="button" onClick={() => setStep(2)} className={onboardingStyles.skipLink} style={{ textAlign: "right", padding: 0, width: "auto" }}>Skip</button>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* Step 1: Your Role (Manager only) */}
+        {isManager && step === 1 && (
+          <>
+            <h1 className={styles.title}>Support Your Team's Growth</h1>
+            <p className={styles.subtitle}>Monitor learning progress, identify skill gaps, and help your team build the skills they need to succeed.</p>
+            <Button onClick={() => setStep(2)} className={styles.submitBtn}>Continue</Button>
+          </>
+        )}
+
+        {/* Step 2: You're Ready (Manager only) */}
+        {isManager && step === 2 && (
+          <>
+            <h1 className={styles.title}>Your Dashboard is Ready</h1>
+            <p className={styles.subtitle}>Everything you need to manage your team's development is waiting for you in your dashboard.</p>
+            <Button onClick={() => router.push("/dashboard")} className={styles.submitBtn}>Go to Dashboard</Button>
+          </>
+        )}
+
+        {/* Step 2: Add Skills (Employee only) */}
+        {isEmployee && step === 2 && (
           <>
             <h1 className={styles.title}>Add Your Skills</h1>
-            <p className={`${styles.subtitle} ${onboardingStyles.hideMobile}`} style={{ marginBottom: "var(--spacing-lg)" }}>Select the skills you have and{"\u00A0"}rate your{"\u00A0"}proficiency level.</p>
+            <p className={`${styles.subtitle} ${onboardingStyles.hideMobile}`} style={{ marginBottom: "var(--spacing-lg)" }}>Add the skills you have and rate your proficiency level</p>
             <div className={styles.form}>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "var(--spacing-md)" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "var(--spacing-md)" }}>
                 {selectedSkills.map((selectedSkill, index) => {
                   const level = proficiencyLevels.find((l) => l.value === String(selectedSkill.level));
                   return (
-                    <div key={index} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 16px", background: "var(--color-on-primary)", border: "1px solid var(--color-outline-variant)", borderRadius: "var(--radius-md)" }}>
+                    <div key={index} style={{ display: "flex", alignItems: "center", padding: "8px 16px", background: "var(--color-on-primary)", border: "1px solid var(--color-outline-variant)", borderRadius: "var(--radius-md)" }}>
                       <div style={{ flex: 1 }}>
                         <div style={{ fontSize: "16px", fontWeight: "var(--font-weight-medium)", marginBottom: "4px" }}>{selectedSkill.skillId}</div>
                         <div style={{ fontSize: "12px", color: "var(--color-on-surface-variant)" }}>{level?.label?.split(" ")[0] || "Level"}</div>
                       </div>
-                      <button type="button" onClick={() => removeSkill(index)} title="Remove" style={{ cursor: "pointer", background: "none", border: "none", color: "var(--color-error)", display: "flex", alignItems: "center", justifyContent: "center", padding: 0, margin: 0, flexShrink: 0 }}>
+                      <button type="button" onClick={() => removeSkill(index)} title="Remove" style={{ cursor: "pointer", background: "none", border: "none", color: "var(--color-error)", display: "flex", alignItems: "center", justifyContent: "center", padding: "4px", marginLeft: "auto", flexShrink: 0, borderRadius: "var(--radius-sm)" }}>
                         <X size={16} />
                       </button>
                     </div>
                   );
                 })}
               </div>
-              {skillErrors && <span style={{ fontSize: "var(--font-size-caption)", color: "var(--color-error)" }}>{skillErrors}</span>}
               {selectedSkills.length < 4 && (
                 <button
                   type="button"
@@ -528,60 +572,7 @@ export default function OnboardingPage() {
                   <Plus size={16} /> {selectedSkills.length === 0 ? "Add Skill" : "Add Another Skill"}
                 </button>
               )}
-              <p style={{ fontSize: "var(--font-size-caption)", color: "var(--color-on-surface-variant)", textAlign: "left", margin: 0, marginTop: "-12px" }}>You can add up to 4 skills during onboarding.</p>
-              <Button onClick={handleSkillsSubmit} className={styles.submitBtn}>Save & Continue</Button>
-              <div style={{ display: "flex", justifyContent: "space-between", marginLeft: "calc(-1 * var(--spacing-md))", width: "calc(100% + var(--spacing-md) * 2)", marginTop: "-8px" }}>
-                <button type="button" onClick={() => setStep(0)} className={onboardingStyles.skipLink} style={{ textAlign: "left", padding: 0, width: "auto" }}>Go Back</button>
-                <button type="button" onClick={() => isManager ? setStep(2) : setStep(2)} className={onboardingStyles.skipLink} style={{ textAlign: "right", padding: 0, width: "auto" }}>Skip</button>
-              </div>
-            </div>
-          </>
-        )}
-
-        {/* Step 2: Team Assignment (Manager only) */}
-        {isManager && step === 2 && (
-          <>
-            <h1 className={styles.title}>Your Department Details</h1>
-            <p className={`${styles.subtitle} ${onboardingStyles.hideMobile}`}>Review your organization and department information.</p>
-            <div className={styles.form}>
-              <Input label="Organization Name" value={(session?.user as any)?.companyName || ""} disabled />
-              <DropdownSelect
-                label="Department"
-                options={departmentOptions}
-                value={selectedDepartmentId}
-                onChange={(v) => { setSelectedDepartmentId(v); setTeamErrors((prev) => { const next = { ...prev }; delete next.departmentId; return next; }); }}
-                error={teamErrors.departmentId}
-              />
-              <DropdownSelect
-                label="Department Size"
-                options={[
-                  { label: "1–10", value: "1-10" },
-                  { label: "11–25", value: "11-25" },
-                  { label: "26–50", value: "26-50" },
-                  { label: "51–100", value: "51-100" },
-                  { label: "100+", value: "100+" },
-                ]}
-                value={departmentSize}
-                onChange={(v) => setDepartmentSize(v)}
-              />
-              <Button onClick={handleTeamSubmit} isLoading={teamSaving} className={styles.submitBtn}>Save & Continue</Button>
-              <div style={{ display: "flex", justifyContent: "space-between", marginLeft: "calc(-1 * var(--spacing-md))", width: "calc(100% + var(--spacing-md) * 2)", marginTop: "-8px" }}>
-                <button type="button" onClick={() => setStep(1)} className={onboardingStyles.skipLink} style={{ textAlign: "left", padding: 0, width: "auto" }}>Go Back</button>
-                <button type="button" onClick={() => setStep(3)} className={onboardingStyles.skipLink} style={{ textAlign: "right", padding: 0, width: "auto" }}>Skip</button>
-              </div>
-            </div>
-          </>
-        )}
-
-        {/* Step 2: Set Career Goals (Employee only) */}
-        {isEmployee && step === 2 && (
-          <>
-            <h1 className={styles.title}>Set Career Goals</h1>
-            <p className={`${styles.subtitle} ${onboardingStyles.hideMobile}`}>Define where you want to go in your career.</p>
-            <div className={styles.form}>
-              <Input label="Target Role" value={careerForm.targetRole} onChange={(e) => updateCareer("targetRole", e.target.value)} placeholder="e.g., Senior Software Engineer" error={careerErrors.targetRole} />
-              <DropdownSelect label="Primary Career Goal" options={careerGoals} value={careerForm.careerGoal} onChange={(v) => updateCareer("careerGoal", v)} error={careerErrors.careerGoal} />
-              <Button onClick={handleCareerSubmit} className={styles.submitBtn}>Complete Onboarding</Button>
+              <Button onClick={handleSkillsSubmit} className={styles.submitBtn}>Complete Onboarding</Button>
               <div style={{ display: "flex", justifyContent: "space-between", marginLeft: "calc(-1 * var(--spacing-md))", width: "calc(100% + var(--spacing-md) * 2)", marginTop: "-8px" }}>
                 <button type="button" onClick={() => setStep(1)} className={onboardingStyles.skipLink} style={{ textAlign: "left", padding: 0, width: "auto" }}>Go Back</button>
                 <button type="button" onClick={() => setStep(3)} className={onboardingStyles.skipLink} style={{ textAlign: "right", padding: 0, width: "auto" }}>Skip</button>
@@ -600,10 +591,10 @@ export default function OnboardingPage() {
                 <div className={styles.form}>
                   <Input label="Full Name" value={inviteForm.fullName} onChange={(e) => updateInvite("fullName", e.target.value)} error={inviteErrors.fullName} />
                   <Input label="Email" type="email" value={inviteForm.email} onChange={(e) => updateInvite("email", e.target.value)} error={inviteErrors.email} />
-                  <DropdownSelect label="Role" options={roles} value={inviteForm.role} onChange={(v) => updateInvite("role", v)} />
-                  <DropdownSelect label="Department" options={departmentOptions} value={inviteForm.department} onChange={(v) => updateInvite("department", v)} required={false} />
+                  <DropdownSelect label="Role" options={roles} value={inviteForm.role} onChange={(v) => updateInvite("role", v)} required={false} />
+                  <DropdownSelect label="Department" options={departmentOptions} value={inviteForm.department} onChange={(v) => updateInvite("department", v)} required={false} disabled={departmentOptions.length === 0} />
+                  {departmentOptions.length === 0 && <span style={{ fontSize: "var(--font-size-caption)", color: "var(--color-on-surface-variant)", marginTop: "calc(4px - var(--spacing-md))" }}>HR Administrator has not added any department yet</span>}
                   <Input label="Job Title" value={inviteForm.jobTitle} onChange={(e) => updateInvite("jobTitle", e.target.value)} required={false} />
-                  {serverError && <div style={{ color: "var(--color-error)", fontSize: "var(--font-size-body-sm)" }}>{serverError}</div>}
                   <Button onClick={handleInvite} className={styles.submitBtn}>Send Invitation</Button>
                   <div style={{ display: "flex", justifyContent: "space-between", marginLeft: "calc(-1 * var(--spacing-md))", width: "calc(100% + var(--spacing-md) * 2)", marginTop: "-8px" }}>
                     <button type="button" onClick={() => setStep(1)} className={onboardingStyles.skipLink} style={{ textAlign: "left", padding: 0, width: "auto" }}>Go Back</button>

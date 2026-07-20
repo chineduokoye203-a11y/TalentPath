@@ -14,7 +14,7 @@ export default function LandingPage() {
         alignItems: "center",
         justifyContent: "center",
         gap: "var(--spacing-lg)",
-        background: "var(--color-surface)",
+        background: "var(--color-on-primary)",
         padding: "var(--spacing-lg)",
         textAlign: "center",
       }}

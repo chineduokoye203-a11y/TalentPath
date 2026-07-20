@@ -5,8 +5,9 @@ import { createOpportunitySchema } from "@/features/opportunities/validations/op
 
 export async function GET() {
   try {
-    await requireAuth();
-    const opportunities = await opportunityService.getAll();
+    const session = await requireAuth();
+    const userId = (session.user as { id: string }).id;
+    const opportunities = await opportunityService.getAll(userId);
     return NextResponse.json({ success: true, data: opportunities });
   } catch (error: any) {
     return NextResponse.json(

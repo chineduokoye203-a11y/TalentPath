@@ -20,18 +20,17 @@ export function UserMenu() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const role = (session?.user as any)?.role || "User";
-  const email = session?.user?.email || "";
-  const initial = email.charAt(0).toUpperCase();
-  const name = email.split("@")[0] || "User";
+  const role = (session?.user as any)?.role || "";
+  const name = (session?.user as any)?.name || session?.user?.email?.split("@")[0] || "User";
+  const initial = name.charAt(0).toUpperCase();
   const roleDisplayNames: Record<string, string> = {
     EMPLOYEE: "Employee",
     MANAGER: "Line Manager",
-    HR: "HR",
+    HR: "HR Admin",
     LEADERSHIP: "Leadership",
     ADMINISTRATOR: "Administrator",
   };
-  const jobTitle = (session?.user as any)?.jobTitle || roleDisplayNames[role] || role;
+  const displayRole = roleDisplayNames[role] || role;
 
   return (
     <div className={styles.wrapper} ref={dropdownRef}>
@@ -39,7 +38,7 @@ export function UserMenu() {
         <div className={styles.avatar}>{initial}</div>
         <div className={styles.info}>
           <span className={styles.title}>{name}</span>
-          <span className={styles.subtitle}>{jobTitle}</span>
+          <span className={styles.subtitle}>{displayRole}</span>
         </div>
       </div>
 

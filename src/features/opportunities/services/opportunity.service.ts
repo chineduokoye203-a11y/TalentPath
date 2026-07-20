@@ -1,20 +1,28 @@
 import { db } from "@/lib/db";
-import { NotFoundError } from "@/lib/errors";
+import { NotFoundError, ForbiddenError } from "@/lib/errors";
 import { writeAuditLog } from "@/lib/audit";
 import type { CreateOpportunityInput, UpdateOpportunityInput } from "../validations/opportunity.schema";
 
+async function getCompanyId(userId: string): Promise<string> {
+  const user = await db.user.findUnique({ where: { id: userId }, select: { companyId: true } });
+  if (!user?.companyId) throw new ForbiddenError("User does not belong to a company");
+  return user.companyId;
+}
+
 export const opportunityService = {
-  async getAll() {
+  async getAll(userId: string) {
+    const companyId = await getCompanyId(userId);
     return await db.internalOpportunity.findMany({
-      where: { deletedAt: null },
+      where: { deletedAt: null, companyId },
       include: { department: true, team: true },
       orderBy: { createdAt: "desc" },
     });
   },
 
-  async getOpenOpportunities() {
+  async getOpenOpportunities(userId: string) {
+    const companyId = await getCompanyId(userId);
     return await db.internalOpportunity.findMany({
-      where: { deletedAt: null, status: "OPEN" },
+      where: { deletedAt: null, status: "OPEN", companyId },
       include: { department: true, team: true },
       orderBy: { createdAt: "desc" },
     });
@@ -30,8 +38,10 @@ export const opportunityService = {
   },
 
   async create(data: CreateOpportunityInput, userId: string) {
+    const companyId = await getCompanyId(userId);
     const opp = await db.internalOpportunity.create({
       data: {
+        companyId,
         title: data.title,
         description: data.description,
         departmentId: data.departmentId ?? null,
@@ -54,8 +64,10 @@ export const opportunityService = {
   },
 
   async update(id: string, data: UpdateOpportunityInput, userId: string) {
+    const companyId = await getCompanyId(userId);
     const existing = await db.internalOpportunity.findUnique({ where: { id } });
     if (!existing || existing.deletedAt) throw new NotFoundError("Opportunity not found");
+    if (existing.companyId !== companyId) throw new ForbiddenError("You can only update opportunities from your company");
 
     const updated = await db.internalOpportunity.update({
       where: { id },
@@ -82,8 +94,10 @@ export const opportunityService = {
   },
 
   async delete(id: string, userId: string) {
+    const companyId = await getCompanyId(userId);
     const existing = await db.internalOpportunity.findUnique({ where: { id } });
     if (!existing || existing.deletedAt) throw new NotFoundError("Opportunity not found");
+    if (existing.companyId !== companyId) throw new ForbiddenError("You can only delete opportunities from your company");
 
     await db.internalOpportunity.update({
       where: { id },

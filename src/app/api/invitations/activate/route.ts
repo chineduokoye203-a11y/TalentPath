@@ -14,8 +14,8 @@ export async function POST(req: Request) {
     const invitation = await invitationService.validateInvitation(data.token);
 
     const inviter = await db.user.findUnique({ where: { id: invitation.createdBy } });
-    if (!inviter || !inviter.companyId) {
-      return NextResponse.json({ success: false, error: { code: "INVITATION_ERROR", message: "Invalid invitation: inviter has no company" } }, { status: 400 });
+    if (!inviter) {
+      return NextResponse.json({ success: false, error: { code: "INVITATION_ERROR", message: "Invalid invitation: inviter not found" } }, { status: 400 });
     }
 
     const user = await userService.createUserFromInvitation({
@@ -27,6 +27,7 @@ export async function POST(req: Request) {
       companyId: inviter.companyId,
       departmentId: invitation.departmentId,
       teamId: invitation.teamId,
+      jobTitle: invitation.jobTitle,
     });
 
     await invitationService.markAccepted(invitation.id);

@@ -45,38 +45,59 @@ export const learningService = {
         departmentId: true,
         department: { select: { name: true } },
         employeeSkills: { select: { skill: { select: { name: true } } } },
+        profile: { select: { targetRoleId: true } },
       },
     });
 
     if (!user) return [];
 
-    const skillNames = user.employeeSkills.map((es) => es.skill.name);
+    const userSkillNames = new Set(user.employeeSkills.map((es) => es.skill.name));
+    const seen = new Set<string>();
+    const searchQueries: string[] = [];
 
-    if (skillNames.length > 0) {
-      const results = await Promise.all(
-        skillNames.map((name) => this.searchCourses({ query: name, pageSize: 2 })),
-      );
-      const seen = new Set<string>();
-      const courses: Course[] = [];
-      for (const result of results) {
-        for (const course of result.data) {
-          if (!seen.has(course.id)) {
-            seen.add(course.id);
-            courses.push(course);
+    if (userSkillNames.size > 0 && user.profile?.targetRoleId) {
+      const targetRole = await db.careerRole.findUnique({
+        where: { id: user.profile.targetRoleId },
+        select: {
+          level: true,
+          careerPathId: true,
+          requiredSkills: {
+            include: { skill: { select: { name: true } } },
+          },
+        },
+      });
+
+      if (targetRole) {
+        const nextRole = await db.careerRole.findFirst({
+          where: { careerPathId: targetRole.careerPathId, level: targetRole.level + 1, deletedAt: null },
+          select: {
+            requiredSkills: {
+              include: { skill: { select: { name: true } } },
+            },
+          },
+        });
+
+        if (nextRole) {
+          for (const rs of nextRole.requiredSkills) {
+            if (!userSkillNames.has(rs.skill.name)) {
+              searchQueries.push(rs.skill.name);
+            }
           }
         }
       }
-      return courses;
     }
 
-    const queries: string[] = [];
-    if (user.department?.name) {
-      queries.push(`${user.department.name} courses`);
+    if (searchQueries.length === 0) {
+      if (user.department?.name) {
+        searchQueries.push(user.department.name);
+      }
+      searchQueries.push("Leadership");
     }
-    queries.push("Leadership");
 
-    const results = await Promise.all(queries.map((q) => this.searchCourses({ query: q, pageSize: 3 })));
-    const seen = new Set<string>();
+    const results = await Promise.all(
+      searchQueries.map((q) => this.searchCourses({ query: q, pageSize: 3 })),
+    );
+
     const courses: Course[] = [];
     for (const result of results) {
       for (const course of result.data) {

@@ -773,10 +773,10 @@ export default function EmployeeProfilePage() {
                       style={{ borderBottom: "1px solid var(--color-outline-variant)" }}
                     >
                       <td style={{ padding: "0.75rem 0.5rem", color: "var(--color-on-surface)", fontWeight: "var(--font-weight-medium)" }}>
-                        {enrollment.learningResource.title}
+                        {enrollment.learningResource?.title ?? "Unknown"}
                       </td>
                       <td style={{ padding: "0.75rem 0.5rem", color: "var(--color-on-surface-variant)" }}>
-                        {enrollment.learningResource.provider}
+                        {enrollment.learningResource?.provider ?? "—"}
                       </td>
                       <td style={{ padding: "0.75rem 0.5rem" }}>
                         <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
