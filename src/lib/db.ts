@@ -14,9 +14,13 @@ function resolveDbUrl(): string {
 }
 
 function createPrisma() {
-  const adapter = new PrismaLibSql({
+  const config: { url: string; authToken?: string } = {
     url: resolveDbUrl(),
-  });
+  };
+  if (process.env.TURSO_AUTH_TOKEN) {
+    config.authToken = process.env.TURSO_AUTH_TOKEN;
+  }
+  const adapter = new PrismaLibSql(config);
   return new PrismaClient({ adapter });
 }
 
