@@ -87,8 +87,17 @@
   border-radius: 50%;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
+  .topRow {
+    display: none;
+  }
+
+  .description {
+    display: none;
+  }
+
   .bottomRow {
-    flex-direction: column;
+    gap: var(--spacing-md);
+    align-items: center;
   }
 }

@@ -4,6 +4,7 @@ import React, { Suspense, useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter, useSearchParams } from "next/navigation";
+import { signIn } from "next-auth/react";
 import { activateAccountSchema, type ActivateAccountInput } from "@/features/identity/validations/invitation.schema";
 import { Path } from "@phosphor-icons/react";
 import { ArrowRight, Eye, EyeOff } from "lucide-react";
@@ -101,6 +102,15 @@ function ActivateForm() {
       });
       const json = await res.json();
       if (json.success) {
+        const signInResult = await signIn("credentials", {
+          email: data.email,
+          password: data.password,
+          redirect: false,
+        });
+        if (signInResult?.error) {
+          setServerError("Account created but sign in failed. Please login.");
+          return;
+        }
         router.push("/onboarding");
       } else {
         setServerError(json.error?.message || "Activation failed");
@@ -158,9 +168,9 @@ function ActivateForm() {
 
           {step === 2 && (
             <>
-              <Input label="Password" type={showPassword ? "text" : "password"} required error={currentRequirement ? undefined : errors.password?.message} suffix={passwordValue ? <span onClick={() => setShowPassword(!showPassword)} style={{ display: "flex" }}>{showPassword ? <EyeOff size={20} /> : <Eye size={20} />}</span> : undefined} {...register("password", { onChange: (e) => setPasswordValue(e.target.value) })} />
+              <Input label="Password" type={showPassword ? "text" : "password"} required error={currentRequirement ? undefined : errors.password?.message} suffix={passwordValue ? <span onClick={() => setShowPassword(!showPassword)} style={{ display: "flex" }}>{showPassword ? <Eye size={20} /> : <EyeOff size={20} />}</span> : undefined} {...register("password", { onChange: (e) => setPasswordValue(e.target.value) })} />
               {currentRequirement && <span style={{ fontSize: "var(--font-size-caption)", color: "var(--color-error)" }}>{currentRequirement.label}</span>}
-              <Input label="Confirm Password" type={showConfirmPassword ? "text" : "password"} required error={confirmPasswordValue && passwordValue !== confirmPasswordValue ? "Password does not match" : errors.confirmPassword?.message} suffix={confirmPasswordValue ? <span onClick={() => setShowConfirmPassword(!showConfirmPassword)} style={{ display: "flex" }}>{showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}</span> : undefined} {...register("confirmPassword", { onChange: (e) => setConfirmPasswordValue(e.target.value) })} />
+              <Input label="Confirm Password" type={showConfirmPassword ? "text" : "password"} required error={confirmPasswordValue && passwordValue !== confirmPasswordValue ? "Password does not match" : errors.confirmPassword?.message} suffix={confirmPasswordValue ? <span onClick={() => setShowConfirmPassword(!showConfirmPassword)} style={{ display: "flex" }}>{showConfirmPassword ? <Eye size={20} /> : <EyeOff size={20} />}</span> : undefined} {...register("confirmPassword", { onChange: (e) => setConfirmPasswordValue(e.target.value) })} />
               <Button type="submit" isLoading={isSubmitting} className={styles.submitBtn}>Activate Account</Button>
               <button type="button" onClick={() => setStep(1)} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--color-on-surface)", fontSize: "var(--font-size-body-sm)", padding: "var(--spacing-xs) 0", margin: "4px auto 0", display: "block" }}>Go Back</button>
             </>

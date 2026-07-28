@@ -51,7 +51,7 @@ export default function LandingPage() {
         </h1>
 
         <p style={{ fontSize: "var(--font-size-body)", color: "var(--color-on-surface-variant)", margin: 0, maxWidth: 480, lineHeight: 1.6 }}>
-          Identify skill gaps, develop talent<br className="mobile-break" /> and future leaders
+          Identify skill gaps, develop<br className="mobile-break" /> talent and future leaders
         </p>
       </div>
 

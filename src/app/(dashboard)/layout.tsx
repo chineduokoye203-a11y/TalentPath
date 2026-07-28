@@ -3,8 +3,9 @@
 import React, { Suspense, useState } from "react";
 import { Sidebar } from "@/components/Sidebar/Sidebar";
 import styles from "./layout.module.css";
-import { Menu } from "lucide-react";
+import { Menu, Bell } from "lucide-react";
 import { useSession } from "next-auth/react";
+import { UserMenu } from "@/components/UserMenu/UserMenu";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
@@ -28,6 +29,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <button className={styles.menuButton} onClick={() => setSidebarOpen(true)}>
             <Menu size={24} />
           </button>
+          <div className={styles.headerControls}>
+            <button className={styles.bellButton}>
+              <span className={styles.bellWrapper}>
+                <Bell size={20} />
+                <span className={styles.notificationDot} />
+              </span>
+            </button>
+            <UserMenu />
+          </div>
         </header>
 
         {/* Page Content */}

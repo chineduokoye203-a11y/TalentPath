@@ -5,8 +5,16 @@ import styles from "./learning.module.css";
 
 export function SearchInput({ defaultValue }: { defaultValue?: string }) {
   const [value, setValue] = useState(defaultValue ?? "");
+  const [isMobile, setIsMobile] = useState(false);
   const resultsRef = useRef<HTMLElement | null>(null);
   const inactivityTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
   const getResults = () => {
     if (!resultsRef.current) {
@@ -61,7 +69,7 @@ export function SearchInput({ defaultValue }: { defaultValue?: string }) {
       name="q"
       value={value}
       onChange={handleChange}
-      placeholder="Search for courses on Udemy Business..."
+      placeholder={isMobile ? "Search courses" : "Search for courses on Udemy Business..."}
       className={styles.searchInput}
     />
   );

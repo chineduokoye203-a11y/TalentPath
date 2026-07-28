@@ -69,13 +69,13 @@
   box-shadow: none;
 }
 
-@media (max-width: 768px) {
-  .card {
-    margin: 0;
-    width: 100%;
-  }
-  .card > div:last-child {
-    padding: var(--spacing-sm) !important;
+.mobileBreak {
+  display: none;
+}
+
+@media (max-width: 480px) {
+  .mobileBreak {
+    display: inline;
   }
 }
 

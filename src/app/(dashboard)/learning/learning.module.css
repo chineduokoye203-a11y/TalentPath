@@ -63,3 +63,17 @@
 .enrollmentCard:hover .cancelButton {
   opacity: 1;
 }
+
+.mobileOnly {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .mobileOnly {
+    display: inline;
+  }
+
+  .desktopOnly {
+    display: none;
+  }
+}

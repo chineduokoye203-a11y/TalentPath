@@ -210,7 +210,8 @@ export default async function LearningPage(props: { searchParams?: Promise<{ q?:
             fontSize: "var(--font-size-body)",
           }}
         >
-          Search Udemy
+          <span className={styles.desktopOnly}>Search Udemy</span>
+          <span className={styles.mobileOnly}>Search</span>
         </button>
       </form>
 

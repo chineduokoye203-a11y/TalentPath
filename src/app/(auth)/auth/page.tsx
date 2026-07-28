@@ -142,10 +142,10 @@ function AuthContent() {
             <span className={authStyles.logoText}>TalentPath</span>
           </Link>
           <h1 className={styles.title}>Login to TalentPath</h1>
-          <p className={styles.subtitle}>Welcome back! Please enter your details.</p>
+          <p className={styles.subtitle}>Welcome back! Please enter<br className={styles.mobileBreak} /> your details.</p>
           <form onSubmit={loginForm.handleSubmit(onLogin)} className={styles.form} autoComplete="off">
             <Input label="Email" type="email" autoFocus autoComplete="new-email" error={loginForm.formState.errors.email?.message} onFocus={() => setServerError(null)} {...loginForm.register("email")} />
-            <Input label="Password" type={showLoginPassword ? "text" : "password"} autoComplete="new-password" labelRight={<button type="button" onClick={() => switchMode("forgot")} className={authStyles.link} style={{ fontSize: "inherit", color: "var(--color-on-background)" }}>Forgot password?</button>} error={loginForm.formState.errors.password?.message} onFocus={() => setServerError(null)} suffix={<span onClick={() => setShowLoginPassword(!showLoginPassword)} style={{ display: "flex" }}>{showLoginPassword ? <EyeOff size={20} /> : <Eye size={20} />}</span>} {...loginForm.register("password")} />
+            <Input label="Password" type={showLoginPassword ? "text" : "password"} autoComplete="new-password" labelRight={<button type="button" onClick={() => switchMode("forgot")} className={authStyles.link} style={{ fontSize: "inherit", color: "var(--color-on-background)" }}>Forgot password?</button>} error={loginForm.formState.errors.password?.message} onFocus={() => setServerError(null)} suffix={<span onClick={() => setShowLoginPassword(!showLoginPassword)} style={{ display: "flex" }}>{showLoginPassword ? <Eye size={20} /> : <EyeOff size={20} />}</span>} {...loginForm.register("password")} />
             <Button type="submit" isLoading={loginForm.formState.isSubmitting} className={styles.submitBtn}>Login</Button>
           </form>
           <p className={styles.footer}>
@@ -223,9 +223,9 @@ function AuthContent() {
 
           {registerStep === 2 && (
             <form onSubmit={step2Form.handleSubmit(onStep2)} className={styles.form}>
-              <Input label="Password" type={showPassword ? "text" : "password"} error={!passwordValue ? step2Form.formState.errors.password?.message : undefined} suffix={passwordValue ? <span onClick={() => setShowPassword(!showPassword)} style={{ display: "flex" }}>{showPassword ? <EyeOff size={20} /> : <Eye size={20} />}</span> : undefined} {...step2Form.register("password", { onChange: (e) => setPasswordValue(e.target.value) })} />
+              <Input label="Password" type={showPassword ? "text" : "password"} error={!passwordValue ? step2Form.formState.errors.password?.message : undefined} suffix={passwordValue ? <span onClick={() => setShowPassword(!showPassword)} style={{ display: "flex" }}>{showPassword ? <Eye size={20} /> : <EyeOff size={20} />}</span> : undefined} {...step2Form.register("password", { onChange: (e) => setPasswordValue(e.target.value) })} />
               {currentRequirement && <span style={{ fontSize: "var(--font-size-caption)", color: "var(--color-error)" }}>{currentRequirement.label}</span>}
-              <Input label="Confirm Password" type={showConfirmPassword ? "text" : "password"} error={confirmPasswordValue && passwordValue !== confirmPasswordValue ? "Password does not match" : step2Form.formState.errors.confirmPassword?.message} suffix={confirmPasswordValue ? <span onClick={() => setShowConfirmPassword(!showConfirmPassword)} style={{ display: "flex" }}>{showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}</span> : undefined} {...step2Form.register("confirmPassword", { onChange: (e) => setConfirmPasswordValue(e.target.value) })} />
+              <Input label="Confirm Password" type={showConfirmPassword ? "text" : "password"} error={confirmPasswordValue && passwordValue !== confirmPasswordValue ? "Password does not match" : step2Form.formState.errors.confirmPassword?.message} suffix={confirmPasswordValue ? <span onClick={() => setShowConfirmPassword(!showConfirmPassword)} style={{ display: "flex" }}>{showConfirmPassword ? <Eye size={20} /> : <EyeOff size={20} />}</span> : undefined} {...step2Form.register("confirmPassword", { onChange: (e) => setConfirmPasswordValue(e.target.value) })} />
               <Button type="submit" isLoading={step2Form.formState.isSubmitting} className={styles.submitBtn}>Create Account</Button>
               <button type="button" onClick={() => setRegisterStep(1)} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--color-on-surface)", fontSize: "var(--font-size-body-sm)", padding: "var(--spacing-xs) 0", textAlign: "center", width: "100%", marginTop: "calc(-0.5 * var(--spacing-md))" }}>Back</button>
             </form>

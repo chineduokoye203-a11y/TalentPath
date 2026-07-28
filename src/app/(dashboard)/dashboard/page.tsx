@@ -262,9 +262,11 @@ function DashboardHomeContent() {
           title={`Welcome back, ${name}`}
           description="Manage your workforce and develop talent."
           action={
-            <Button onClick={() => setShowInviteModal(true)}>
-              <UserPlus size={16} style={{ marginRight: "var(--spacing-xs)" }} /> Invite New Users
-            </Button>
+            <span className={dashboardStyles.hideOnMobile}>
+              <Button onClick={() => setShowInviteModal(true)}>
+                <UserPlus size={16} style={{ marginRight: "var(--spacing-xs)" }} /> Invite New Users
+              </Button>
+            </span>
           }
         />
 

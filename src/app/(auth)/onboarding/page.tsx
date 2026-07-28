@@ -268,11 +268,7 @@ export default function OnboardingPage() {
       });
       const json = await res.json();
       if (json.success) {
-        if (isManager) {
-          setStep(2);
-        } else {
-          setStep(3);
-        }
+        setStep(3);
       } else {
         setServerError(json.error?.message || "Failed to save skills");
       }
@@ -385,16 +381,12 @@ export default function OnboardingPage() {
 
         <div style={{ marginBottom: "var(--spacing-lg)", display: "flex", alignItems: "center", justifyContent: "center", gap: "0" }}>
           {[1, 2, 3].map((s) => {
-            const completed = isManager
-              ? step > s - 1 || (s === 3 && step === 2)
-              : isEmployee
-                ? step > s - 1
-                : step > s - 1 || (s === 3 && step === 2 && inviteSuccess);
-            const active = isManager
-              ? step >= s - 1
-              : isEmployee
-                ? step >= s - 1
-                : step >= s - 1 || (s === 3 && step === 2 && inviteSuccess);
+            const completed = (!isEmployee && !isManager)
+              ? step > s - 1 || (s === 3 && step === 2 && inviteSuccess)
+              : step > s - 1;
+            const active = (!isEmployee && !isManager)
+              ? step >= s - 1 || (s === 3 && step === 2 && inviteSuccess)
+              : step >= s - 1;
             return (
               <React.Fragment key={s}>
                 <div style={{ width: 32, height: 32, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "var(--font-size-body-sm)", fontWeight: "var(--font-weight-semibold)", color: active ? "#fff" : "var(--color-on-surface-variant)", background: active ? "var(--color-primary)" : "var(--color-background)", border: active ? "none" : "1px solid var(--color-outline-variant)" }}>{completed ? <Check size={16} /> : s}</div>
@@ -502,8 +494,8 @@ export default function OnboardingPage() {
           </>
         )}
 
-        {/* Step 1: Set Career Goals (Employee only) */}
-        {isEmployee && step === 1 && (
+        {/* Step 1: Set Career Goals (Employee & Manager) */}
+        {(isEmployee || isManager) && step === 1 && (
           <>
             <h1 className={styles.title}>Set Career Goals</h1>
             <p className={`${styles.subtitle} ${onboardingStyles.hideMobile}`}>Define where you want to go in your career.</p>
@@ -519,26 +511,8 @@ export default function OnboardingPage() {
           </>
         )}
 
-        {/* Step 1: Your Role (Manager only) */}
-        {isManager && step === 1 && (
-          <>
-            <h1 className={styles.title}>Support Your Team's Growth</h1>
-            <p className={styles.subtitle}>Monitor learning progress, identify skill gaps, and help your team build the skills they need to succeed.</p>
-            <Button onClick={() => setStep(2)} className={styles.submitBtn}>Continue</Button>
-          </>
-        )}
-
-        {/* Step 2: You're Ready (Manager only) */}
-        {isManager && step === 2 && (
-          <>
-            <h1 className={styles.title}>Your Dashboard is Ready</h1>
-            <p className={styles.subtitle}>Everything you need to manage your team's development is waiting for you in your dashboard.</p>
-            <Button onClick={() => router.push("/dashboard")} className={styles.submitBtn}>Go to Dashboard</Button>
-          </>
-        )}
-
-        {/* Step 2: Add Skills (Employee only) */}
-        {isEmployee && step === 2 && (
+        {/* Step 2: Add Skills (Employee & Manager) */}
+        {(isEmployee || isManager) && step === 2 && (
           <>
             <h1 className={styles.title}>Add Your Skills</h1>
             <p className={`${styles.subtitle} ${onboardingStyles.hideMobile}`} style={{ marginBottom: "var(--spacing-lg)" }}>Add the skills you have and rate your proficiency level</p>

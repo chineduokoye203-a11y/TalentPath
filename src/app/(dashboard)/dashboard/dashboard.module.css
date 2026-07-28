@@ -1,3 +1,9 @@
 .hrCard > div:first-child {
   background-color: var(--color-on-primary);
 }
+
+@media (max-width: 768px) {
+  .hideOnMobile {
+    display: none;
+  }
+}

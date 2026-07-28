@@ -4,7 +4,6 @@ import { invitationService } from "@/features/identity/services/invitation.servi
 import { userService } from "@/features/identity/services/user.service";
 import { activateAccountSchema } from "@/features/identity/validations/invitation.schema";
 import { writeAuditLog } from "@/lib/audit";
-import { signIn } from "@/lib/auth";
 
 export async function POST(req: Request) {
   try {
@@ -41,13 +40,7 @@ export async function POST(req: Request) {
       new: { status: "ACCEPTED" },
     });
 
-    await signIn("credentials", {
-      email: invitation.email,
-      password: data.password,
-      redirect: false,
-    });
-
-    return NextResponse.json({ success: true, data: { userId: user.id, onboardingRequired: true } }, { status: 201 });
+    return NextResponse.json({ success: true, data: { userId: user.id, email: invitation.email, onboardingRequired: true } }, { status: 201 });
   } catch (error: any) {
     if (error.name === "ZodError") {
       return NextResponse.json({ success: false, error: { code: "VALIDATION_ERROR", message: error.issues.map((e: any) => e.message).join("; ") } }, { status: 400 });

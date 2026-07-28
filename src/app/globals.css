@@ -103,3 +103,8 @@ textarea) {
   -webkit-box-shadow: 0 0 0 1000px var(--color-inverse-on-surface) inset !important;
   -webkit-text-fill-color: var(--color-on-surface) !important;
 }
+
+select option:hover {
+  background: hsl(9, 81%, 46%) !important;
+  color: #fff !important;
+}
