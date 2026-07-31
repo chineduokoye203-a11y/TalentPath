@@ -15,7 +15,7 @@ import { Select } from "@/components/Select/Select";
 import { Modal } from "@/components/Modal/Modal";
 
 import { enrollInCourseAction } from "@/features/learning/actions/learning.actions";
-import { UserPlus, Users, BookOpen, Map, Compass, ArrowRight, Sparkles } from "lucide-react";
+import { UserPlus, Users, BookOpen, Map, Compass, ArrowRight, Sparkles, CheckCircle } from "lucide-react";
 import dashboardStyles from "./dashboard.module.css";
 
 interface Department { id: string; name: string; }
@@ -46,12 +46,21 @@ function formatDuration(seconds: number): string {
 
 function RecommendedCourses() {
   const [courses, setCourses] = useState<RecommendedCourse[]>([]);
+  const [enrolledIds, setEnrolledIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/recommendations/courses")
-      .then((r) => r.json())
-      .then((j) => { if (j.success) setCourses(j.data); })
+    Promise.all([
+      fetch("/api/recommendations/courses").then((r) => r.json()),
+      fetch("/api/learning/enrollments?mine=1").then((r) => r.json()),
+    ])
+      .then(([recs, enrollments]) => {
+        if (recs.success) setCourses(recs.data);
+        if (enrollments.success) {
+          const ids = new Set<string>((enrollments.data || []).map((e: any) => e.resource?.providerId));
+          setEnrolledIds(ids);
+        }
+      })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
@@ -64,7 +73,21 @@ function RecommendedCourses() {
     );
   }
 
-  if (courses.length === 0) return null;
+  if (courses.length === 0) {
+    return (
+      <Card
+        title="Recommended For You"
+        actions={
+          <div style={{ display: "flex", alignItems: "center", gap: "var(--spacing-xs)", color: "var(--color-on-surface-variant)", fontSize: "var(--font-size-body-sm)" }}>
+            <Sparkles size={14} />
+            <span>AI-powered</span>
+          </div>
+        }
+      >
+        <p style={{ color: "var(--color-on-surface-variant)", margin: 0 }}>Add a skill to get AI-powered course recommendations tailored to you.</p>
+      </Card>
+    );
+  }
 
   return (
     <Card
@@ -139,37 +162,56 @@ function RecommendedCourses() {
                 </p>
               )}
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <form action={enrollInCourseAction} style={{ margin: 0, padding: 0 }}>
-                  <input type="hidden" name="courseId" value={course.id} />
-                  <input type="hidden" name="courseTitle" value={course.title} />
-                  <input type="hidden" name="courseDescription" value={course.description} />
-                  <input type="hidden" name="courseUrl" value={course.url} />
-                  <input type="hidden" name="courseProvider" value={course.provider ?? ""} />
-                  <input type="hidden" name="courseImageUrl" value={course.imageUrl ?? ""} />
-                  <input type="hidden" name="courseInstructor" value={course.instructor ?? ""} />
-                  <input type="hidden" name="courseDuration" value={String(course.duration)} />
-                  <input type="hidden" name="courseCategory" value={course.category} />
-                  <input type="hidden" name="courseLevel" value={course.level} />
-                  <button
-                    type="submit"
+                {enrolledIds.has(course.id) ? (
+                  <span
                     style={{
                       display: "inline-flex",
                       alignItems: "center",
                       justifyContent: "center",
                       padding: "8px 16px",
-                      background: "var(--color-primary)",
-                      color: "var(--color-on-primary)",
-                      border: "none",
+                      background: "var(--color-surface-container-low)",
+                      color: "var(--color-on-surface-variant)",
+                      border: "1px solid var(--color-outline-variant)",
                       borderRadius: "var(--radius-sm)",
                       fontWeight: "var(--font-weight-medium)",
                       fontSize: "var(--font-size-body-sm)",
-                      cursor: "pointer",
-                      transition: "all 150ms ease",
                     }}
                   >
-                    Enroll
-                  </button>
-                </form>
+                    Enrolled
+                  </span>
+                ) : (
+                  <form action={enrollInCourseAction} style={{ margin: 0, padding: 0 }}>
+                    <input type="hidden" name="courseId" value={course.id} />
+                    <input type="hidden" name="courseTitle" value={course.title} />
+                    <input type="hidden" name="courseDescription" value={course.description} />
+                    <input type="hidden" name="courseUrl" value={course.url} />
+                    <input type="hidden" name="courseProvider" value={course.provider ?? ""} />
+                    <input type="hidden" name="courseImageUrl" value={course.imageUrl ?? ""} />
+                    <input type="hidden" name="courseInstructor" value={course.instructor ?? ""} />
+                    <input type="hidden" name="courseDuration" value={String(course.duration)} />
+                    <input type="hidden" name="courseCategory" value={course.category} />
+                    <input type="hidden" name="courseLevel" value={course.level} />
+                    <button
+                      type="submit"
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        padding: "8px 16px",
+                        background: "var(--color-primary)",
+                        color: "var(--color-on-primary)",
+                        border: "none",
+                        borderRadius: "var(--radius-sm)",
+                        fontWeight: "var(--font-weight-medium)",
+                        fontSize: "var(--font-size-body-sm)",
+                        cursor: "pointer",
+                        transition: "all 150ms ease",
+                      }}
+                    >
+                      Enroll
+                    </button>
+                  </form>
+                )}
                 <a
                   href={course.url}
                   target="_blank"
@@ -238,13 +280,7 @@ function DashboardHomeContent() {
       if (json.success) {
         reset();
         setShowInviteModal(false);
-        setTimeout(() => {
-          setInviteSuccess(true);
-          setTimeout(() => {
-            setInviteSuccess(false);
-            router.push("/admin/invitations");
-          }, 10000);
-        }, 300);
+        setTimeout(() => setInviteSuccess(true), 300);
       } else {
         setServerError(json.error?.message || "Failed to create invitation");
       }
@@ -331,10 +367,11 @@ function DashboardHomeContent() {
           </form>
         </Modal>
 
-        <Modal isOpen={inviteSuccess} onClose={() => { setInviteSuccess(false); router.push("/admin/invitations"); }} title="Invitation Sent" size="sm">
-          <div style={{ textAlign: "center", padding: "var(--spacing-md) 0" }}>
-            <p style={{ margin: 0, fontSize: "var(--font-size-body)", color: "var(--color-on-surface)" }}>User has been invited successfully.</p>
-            <p style={{ margin: "var(--spacing-sm) 0 0 0", fontSize: "var(--font-size-body-sm)", color: "var(--color-on-surface-variant)" }}>Redirecting to invitations page...</p>
+        <Modal isOpen={inviteSuccess} onClose={() => setInviteSuccess(false)} title="Invitation Sent" size="sm">
+          <div style={{ textAlign: "center", padding: "var(--spacing-lg) var(--spacing-md)" }}>
+            <CheckCircle size={48} style={{ color: "var(--color-primary)", marginBottom: "var(--spacing-md)" }} />
+            <p style={{ margin: 0, fontSize: "var(--font-size-body)", fontWeight: "var(--font-weight-semibold)", color: "var(--color-on-surface)" }}>User Invited</p>
+            <p style={{ margin: "var(--spacing-xs) 0 0 0", fontSize: "var(--font-size-body-sm)", color: "var(--color-on-surface-variant)" }}>An invitation email has been sent. The user can now onboard to the platform.</p>
           </div>
         </Modal>
       </div>

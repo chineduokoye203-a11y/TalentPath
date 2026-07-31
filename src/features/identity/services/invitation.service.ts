@@ -10,12 +10,19 @@ const INVITATION_EXPIRY_DAYS = 7;
 
 export const invitationService = {
   async createInvitation(data: CreateInvitationInput, createdBy: string): Promise<Invitation> {
-    const existing = await db.invitation.findFirst({
+    const existingPending = await db.invitation.findFirst({
       where: { email: data.email, status: "PENDING" },
     });
-    if (existing) throw new ValidationError("An active invitation already exists for this email");
+    if (existingPending) {
+      await db.invitation.update({
+        where: { id: existingPending.id },
+        data: { status: "REVOKED" },
+      });
+    }
 
-    const userExists = await db.user.findUnique({ where: { email: data.email } });
+    const userExists = await db.user.findFirst({
+      where: { email: data.email, deletedAt: null },
+    });
     if (userExists) throw new ValidationError("A user with this email already exists");
 
     const token = randomBytes(32).toString("hex");

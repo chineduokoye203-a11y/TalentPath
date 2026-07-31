@@ -87,6 +87,14 @@ export const learningService = {
       }
     }
 
+    if (searchQueries.length === 0 && userSkillNames.size > 0) {
+      const skillNames = Array.from(userSkillNames);
+      for (const name of skillNames) {
+        searchQueries.push(`Advanced ${name}`);
+      }
+      searchQueries.push(...skillNames);
+    }
+
     if (searchQueries.length === 0) {
       if (user.department?.name) {
         searchQueries.push(user.department.name);

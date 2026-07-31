@@ -344,12 +344,10 @@ function SkillsPageContent() {
         title="My Skills"
         description="Track and assess your professional capabilities."
         action={
-          mySkills.length > 0 ? (
-            <Button onClick={() => router.push("/skills?add=1")}>
-              <Plus size={16} style={{ marginRight: "6px" }} />
-              Add Skill
-            </Button>
-          ) : undefined
+          <Button onClick={() => router.push("/skills?add=1")}>
+            <Plus size={16} style={{ marginRight: "6px" }} />
+            Add Skill
+          </Button>
         }
       />
 

@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { NotFoundError } from "@/lib/errors";
+import { NotFoundError, ForbiddenError } from "@/lib/errors";
 import { writeAuditLog } from "@/lib/audit";
 import type {
   PromotionAssessmentInput,
@@ -8,6 +8,15 @@ import type {
   CreateCareerRoleInput,
   UpdateCareerRoleInput,
 } from "../validations/career.schema";
+
+async function getCompanyId(userId: string): Promise<string> {
+  const user = await db.user.findUnique({
+    where: { id: userId },
+    select: { companyId: true },
+  });
+  if (!user?.companyId) throw new ForbiddenError("User does not belong to a company");
+  return user.companyId;
+}
 
 async function resolveSkillId(skillName: string): Promise<string> {
   const existing = await db.skill.findFirst({ where: { name: skillName, deletedAt: null } });
@@ -25,9 +34,9 @@ async function resolveSkillId(skillName: string): Promise<string> {
 }
 
 export const careerService = {
-  async getCareerPaths() {
+  async getCareerPaths(companyId: string) {
     return await db.careerPath.findMany({
-      where: { deletedAt: null },
+      where: { deletedAt: null, companyId },
       include: {
         department: true,
         roles: {
@@ -40,7 +49,7 @@ export const careerService = {
     });
   },
 
-  async getCareerPath(id: string) {
+  async getCareerPath(id: string, companyId: string) {
     const path = await db.careerPath.findUnique({
       where: { id },
       include: {
@@ -53,12 +62,16 @@ export const careerService = {
       },
     });
     if (!path || path.deletedAt) throw new NotFoundError("Career path not found");
+    if (path.companyId && path.companyId !== companyId) throw new ForbiddenError("Access denied");
     return path;
   },
 
   async createCareerPath(data: CreateCareerPathInput, userId: string) {
+    const companyId = await getCompanyId(userId);
+
     const path = await db.careerPath.create({
       data: {
+        companyId,
         name: data.name,
         description: data.description ?? null,
         departmentId: data.departmentId ?? null,
@@ -70,15 +83,18 @@ export const careerService = {
       entity: "CareerPath",
       entityId: path.id,
       userId,
-      new: { name: data.name, description: data.description, departmentId: data.departmentId },
+      new: { name: data.name, description: data.description, departmentId: data.departmentId, companyId },
     });
 
     return path;
   },
 
   async updateCareerPath(id: string, data: UpdateCareerPathInput, userId: string) {
+    const companyId = await getCompanyId(userId);
+
     const existing = await db.careerPath.findUnique({ where: { id } });
     if (!existing || existing.deletedAt) throw new NotFoundError("Career path not found");
+    if (existing.companyId && existing.companyId !== companyId) throw new ForbiddenError("Access denied");
 
     const updated = await db.careerPath.update({
       where: { id },
@@ -102,8 +118,11 @@ export const careerService = {
   },
 
   async deleteCareerPath(id: string, userId: string) {
+    const companyId = await getCompanyId(userId);
+
     const existing = await db.careerPath.findUnique({ where: { id } });
     if (!existing || existing.deletedAt) throw new NotFoundError("Career path not found");
+    if (existing.companyId && existing.companyId !== companyId) throw new ForbiddenError("Access denied");
 
     await db.careerPath.update({
       where: { id },
@@ -119,22 +138,27 @@ export const careerService = {
     });
   },
 
-  async getRole(roleId: string) {
+  async getRole(roleId: string, companyId: string) {
     const role = await db.careerRole.findUnique({
       where: { id: roleId },
       include: { careerPath: true },
     });
     if (!role) throw new NotFoundError("Role not found");
+    if (role.companyId && role.companyId !== companyId) throw new ForbiddenError("Access denied");
     return role;
   },
 
   async createCareerRole(careerPathId: string, data: CreateCareerRoleInput, userId: string) {
+    const companyId = await getCompanyId(userId);
+
     const path = await db.careerPath.findUnique({ where: { id: careerPathId } });
     if (!path || path.deletedAt) throw new NotFoundError("Career path not found");
+    if (path.companyId && path.companyId !== companyId) throw new ForbiddenError("Access denied");
 
     const role = await db.careerRole.create({
       data: {
         careerPathId,
+        companyId,
         title: data.title,
         level: data.level,
         experienceYears: data.experienceYears ?? null,
@@ -160,15 +184,18 @@ export const careerService = {
       entity: "CareerRole",
       entityId: role.id,
       userId,
-      new: { title: data.title, level: data.level, careerPathId },
+      new: { title: data.title, level: data.level, careerPathId, companyId },
     });
 
     return role;
   },
 
   async updateCareerRole(id: string, data: UpdateCareerRoleInput, userId: string) {
+    const companyId = await getCompanyId(userId);
+
     const existing = await db.careerRole.findUnique({ where: { id } });
     if (!existing || existing.deletedAt) throw new NotFoundError("Career role not found");
+    if (existing.companyId && existing.companyId !== companyId) throw new ForbiddenError("Access denied");
 
     const updated = await db.careerRole.update({
       where: { id },
@@ -207,8 +234,11 @@ export const careerService = {
   },
 
   async deleteCareerRole(id: string, userId: string) {
+    const companyId = await getCompanyId(userId);
+
     const existing = await db.careerRole.findUnique({ where: { id } });
     if (!existing || existing.deletedAt) throw new NotFoundError("Career role not found");
+    if (existing.companyId && existing.companyId !== companyId) throw new ForbiddenError("Access denied");
 
     await db.careerRole.update({
       where: { id },
@@ -225,6 +255,15 @@ export const careerService = {
   },
 
   async createPromotionAssessment(data: PromotionAssessmentInput, assessedById: string) {
+    const companyId = await getCompanyId(assessedById);
+
+    const role = await db.careerRole.findUnique({ where: { id: data.roleId } });
+    if (!role) throw new NotFoundError("Career role not found");
+    if (role.companyId && role.companyId !== companyId) throw new ForbiddenError("Access denied");
+
+    const employee = await db.user.findUnique({ where: { id: data.employeeId } });
+    if (!employee || employee.companyId !== companyId) throw new ForbiddenError("Employee does not belong to your company");
+
     const assessment = await db.promotionAssessment.create({
       data: {
         userId: data.employeeId,

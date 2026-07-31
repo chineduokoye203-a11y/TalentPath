@@ -3,6 +3,7 @@ import dns from "dns";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 
+dns.setDefaultResultOrder("ipv4first");
 dns.setServers(["8.8.8.8", "8.8.4.4"]);
 
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };

@@ -27,6 +27,7 @@ export async function enrollInCourseAction(formData: FormData) {
   await learningService.enrollInCourse(session.user.id, course);
 
   revalidatePath("/learning");
+  revalidatePath("/dashboard");
 }
 
 export async function cancelEnrollmentAction(enrollmentId: string) {

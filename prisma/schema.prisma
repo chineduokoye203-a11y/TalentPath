@@ -22,6 +22,8 @@ model Company {
   users              User[]
   opportunities      InternalOpportunity[]
   departments        Department[]
+  careerPaths        CareerPath[]
+  careerRoles        CareerRole[]
 }
 
 model User {
@@ -178,6 +180,7 @@ model SkillGap {
 
 model CareerPath {
   id           String       @id @default(cuid())
+  companyId    String?
   name         String
   description  String?
   departmentId String?
@@ -185,6 +188,7 @@ model CareerPath {
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
 
+  company      Company?     @relation(fields: [companyId], references: [id])
   department   Department?  @relation(fields: [departmentId], references: [id])
   roles        CareerRole[]
 }
@@ -192,6 +196,7 @@ model CareerPath {
 model CareerRole {
   id                String            @id @default(cuid())
   careerPathId      String
+  companyId         String?
   title             String
   level             Int               // Order in path
   experienceYears   Int?
@@ -201,6 +206,7 @@ model CareerRole {
   updatedAt         DateTime          @updatedAt
 
   careerPath        CareerPath        @relation(fields: [careerPathId], references: [id])
+  company           Company?          @relation(fields: [companyId], references: [id])
   requiredSkills    CareerRoleSkill[]
   skillGaps         SkillGap[]
   assessments       PromotionAssessment[]

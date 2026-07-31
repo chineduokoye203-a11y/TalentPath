@@ -50,6 +50,7 @@ function AuthContent() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showLoginPassword, setShowLoginPassword] = useState(false);
+  const [loginPasswordValue, setLoginPasswordValue] = useState("");
   const [passwordValue, setPasswordValue] = useState("");
   const [confirmPasswordValue, setConfirmPasswordValue] = useState("");
 
@@ -145,7 +146,7 @@ function AuthContent() {
           <p className={styles.subtitle}>Welcome back! Please enter<br className={styles.mobileBreak} /> your details.</p>
           <form onSubmit={loginForm.handleSubmit(onLogin)} className={styles.form} autoComplete="off">
             <Input label="Email" type="email" autoFocus autoComplete="new-email" error={loginForm.formState.errors.email?.message} onFocus={() => setServerError(null)} {...loginForm.register("email")} />
-            <Input label="Password" type={showLoginPassword ? "text" : "password"} autoComplete="new-password" labelRight={<button type="button" onClick={() => switchMode("forgot")} className={authStyles.link} style={{ fontSize: "inherit", color: "var(--color-on-background)" }}>Forgot password?</button>} error={loginForm.formState.errors.password?.message} onFocus={() => setServerError(null)} suffix={<span onClick={() => setShowLoginPassword(!showLoginPassword)} style={{ display: "flex" }}>{showLoginPassword ? <Eye size={20} /> : <EyeOff size={20} />}</span>} {...loginForm.register("password")} />
+            <Input label="Password" type={showLoginPassword ? "text" : "password"} autoComplete="new-password" labelRight={<button type="button" onClick={() => switchMode("forgot")} className={authStyles.link} style={{ fontSize: "inherit", color: "var(--color-on-background)" }}>Forgot password?</button>} error={loginForm.formState.errors.password?.message} onFocus={() => setServerError(null)} suffix={loginPasswordValue ? <span onClick={() => setShowLoginPassword(!showLoginPassword)} style={{ display: "flex" }}>{showLoginPassword ? <Eye size={20} /> : <EyeOff size={20} />}</span> : undefined} {...loginForm.register("password", { onChange: (e) => setLoginPasswordValue(e.target.value) })} />
             <Button type="submit" isLoading={loginForm.formState.isSubmitting} className={styles.submitBtn}>Login</Button>
           </form>
           <p className={styles.footer}>

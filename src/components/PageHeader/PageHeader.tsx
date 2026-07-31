@@ -1,7 +1,5 @@
 import React from "react";
 import styles from "./PageHeader.module.css";
-import { Bell } from "lucide-react";
-import { UserMenu } from "@/components/UserMenu/UserMenu";
 
 export function PageHeader({
   title,
@@ -16,18 +14,11 @@ export function PageHeader({
 }) {
   return (
     <div className={styles.wrapper}>
-      <div className={`${styles.topRow} ${topLeft ? styles.withLeft : ""}`}>
-        {topLeft ? <div className={styles.topLeft}>{topLeft}</div> : <div />}
-        <div className={styles.topRightControls}>
-          <button className={styles.iconButton}>
-            <span className={styles.bellWrapper}>
-              <Bell size={20} />
-              <span className={styles.notificationDot} />
-            </span>
-          </button>
-          <UserMenu />
+      {topLeft && (
+        <div className={styles.topRow}>
+          <div className={styles.topLeft}>{topLeft}</div>
         </div>
-      </div>
+      )}
       <div className={styles.bottomRow}>
         <div className={styles.leftContent}>
           <h1 className={styles.title}>{title}</h1>

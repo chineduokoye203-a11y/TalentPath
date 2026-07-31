@@ -34,7 +34,9 @@ interface UpdateProfileInput {
 
 export const userService = {
   async createUserFromInvitation(data: CreateUserFromInviteInput): Promise<User> {
-    const existing = await db.user.findUnique({ where: { email: data.email } });
+    const existing = await db.user.findFirst({
+      where: { email: data.email, deletedAt: null },
+    });
     if (existing) throw new ValidationError("Email already in use");
 
     const passwordHash = await bcrypt.hash(data.password, 10);
@@ -75,7 +77,9 @@ export const userService = {
   },
 
   async signUp(companyName: string, email: string, password: string): Promise<User> {
-    const existing = await db.user.findUnique({ where: { email } });
+    const existing = await db.user.findFirst({
+      where: { email, deletedAt: null },
+    });
     if (existing) throw new ValidationError("Email already in use");
 
     let company = await db.company.findUnique({ where: { name: companyName } });

@@ -13,7 +13,7 @@ import { Modal } from "@/components/Modal/Modal";
 import { Card } from "@/components/Card/Card";
 import { Table } from "@/components/Table/Table";
 import { PageHeader } from "@/components/PageHeader/PageHeader";
-import { UserPlus } from "lucide-react";
+import { UserPlus, CheckCircle } from "lucide-react";
 import { Badge } from "@/components/Badge/Badge";
 
 interface Invitation {
@@ -51,6 +51,7 @@ export default function InvitationsPage() {
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [inviteSuccess, setInviteSuccess] = useState(false);
   const [revokingId, setRevokingId] = useState<string | null>(null);
   const [serverError, setServerError] = useState<string | null>(null);
   const [departments, setDepartments] = useState<Department[]>([]);
@@ -90,6 +91,7 @@ export default function InvitationsPage() {
         setShowCreateModal(false);
         reset();
         fetchInvitations();
+        setTimeout(() => setInviteSuccess(true), 300);
       } else {
         setServerError(json.error?.message || "Failed to create invitation");
       }
@@ -182,6 +184,14 @@ export default function InvitationsPage() {
             <Button type="submit" isLoading={isSubmitting}>Send Invitation</Button>
           </div>
         </form>
+      </Modal>
+
+      <Modal isOpen={inviteSuccess} onClose={() => setInviteSuccess(false)} title="Invitation Sent" size="sm">
+        <div style={{ textAlign: "center", padding: "var(--spacing-lg) var(--spacing-md)" }}>
+          <CheckCircle size={48} style={{ color: "var(--color-primary)", marginBottom: "var(--spacing-md)" }} />
+          <p style={{ margin: 0, fontSize: "var(--font-size-body)", fontWeight: "var(--font-weight-semibold)", color: "var(--color-on-surface)" }}>User Invited</p>
+          <p style={{ margin: "var(--spacing-xs) 0 0 0", fontSize: "var(--font-size-body-sm)", color: "var(--color-on-surface-variant)" }}>An invitation email has been sent. The user can now onboard to the platform.</p>
+        </div>
       </Modal>
 
       <Modal isOpen={!!revokingId} onClose={() => setRevokingId(null)} title="Revoke Invitation" size="md" inline>

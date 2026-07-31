@@ -145,6 +145,126 @@ const MOCK_COURSES: UdemyCourse[] = [
     primary_category: { title: "Development" },
     estimated_content_length: 100800,
   },
+  {
+    id: 201,
+    title: "Canva Masterclass: Graphic Design for Beginners",
+    url: "https://udemy.com/course/canva-masterclass-graphic-design",
+    headline: "Learn Canva from scratch. Create stunning graphics, presentations, social media content, and brand kits",
+    image_480x270: "https://placehold.co/480x270/E0D8E8/4F5B6B?text=Canva",
+    visible_instructors: [{ display_name: "Phil Ebiner" }],
+    content_info: "14 hours total",
+    instructional_level: "All Levels",
+    primary_category: { title: "Design" },
+    estimated_content_length: 50400,
+  },
+  {
+    id: 202,
+    title: "Adobe Photoshop CC — Advanced Training Course",
+    url: "https://udemy.com/course/adobe-photoshop-cc-advanced-training",
+    headline: "Master advanced Photoshop techniques. Photo manipulation, compositing, retouching, and digital art",
+    image_480x270: "https://placehold.co/480x270/D0E8D8/4F6B5F?text=Photoshop",
+    visible_instructors: [{ display_name: "Daniel Walter Scott" }],
+    content_info: "22 hours total",
+    instructional_level: "Advanced",
+    primary_category: { title: "Design" },
+    estimated_content_length: 79200,
+  },
+  {
+    id: 203,
+    title: "UI/UX Design With Figma",
+    url: "https://udemy.com/course/ui-ux-design-with-figma",
+    headline: "Learn UI/UX design from scratch using Figma. Wireframing, prototyping, design systems, and user testing",
+    image_480x270: "https://placehold.co/480x270/E8D8D0/6B5F4F?text=Figma",
+    visible_instructors: [{ display_name: "Andrei Neagoie" }],
+    content_info: "20 hours total",
+    instructional_level: "Beginner",
+    primary_category: { title: "Design" },
+    estimated_content_length: 72000,
+  },
+  {
+    id: 204,
+    title: "Advanced PowerPoint: Presentations That Impress",
+    url: "https://udemy.com/course/advanced-powerpoint-presentations",
+    headline: "Create professional, high-impact presentations. Master animations, transitions, templates, and data visualization",
+    image_480x270: "https://placehold.co/480x270/D8D0E8/5F4F6B?text=PowerPoint",
+    visible_instructors: [{ display_name: "Kyle Pew" }],
+    content_info: "10 hours total",
+    instructional_level: "Intermediate",
+    primary_category: { title: "Business" },
+    estimated_content_length: 36000,
+  },
+  {
+    id: 205,
+    title: "Project Management Professional (PMP)",
+    url: "https://udemy.com/course/project-management-professional-pmp",
+    headline: "Complete PMP certification prep. Agile, Scrum, waterfall, risk management, and stakeholder communication",
+    image_480x270: "https://placehold.co/480x270/E8E0D8/6B6B4F?text=PMP",
+    visible_instructors: [{ display_name: "Joseph Phillips" }],
+    content_info: "35 hours total",
+    instructional_level: "All Levels",
+    primary_category: { title: "Business" },
+    estimated_content_length: 126000,
+  },
+  {
+    id: 206,
+    title: "Data Analysis with Excel: Zero to Hero",
+    url: "https://udemy.com/course/data-analysis-with-excel",
+    headline: "Master Excel for data analysis. Pivot tables, VLOOKUP, Power Query, dashboards, and business analytics",
+    image_480x270: "https://placehold.co/480x270/E0E8D8/5F6B4F?text=Excel",
+    visible_instructors: [{ display_name: "Chris Dutton" }],
+    content_info: "18 hours total",
+    instructional_level: "All Levels",
+    primary_category: { title: "Business" },
+    estimated_content_length: 64800,
+  },
+  {
+    id: 207,
+    title: "Public Speaking: Speak With Confidence",
+    url: "https://udemy.com/course/public-speaking-speak-with-confidence",
+    headline: "Overcome your fear of public speaking. Deliver powerful presentations with confidence and charisma",
+    image_480x270: "https://placehold.co/480x270/D8E8D8/6B4F4F?text=Speaking",
+    visible_instructors: [{ display_name: "Jason Teteak" }],
+    content_info: "8 hours total",
+    instructional_level: "All Levels",
+    primary_category: { title: "Personal Development" },
+    estimated_content_length: 28800,
+  },
+  {
+    id: 208,
+    title: "Machine Learning A-Z: AI, Python & R",
+    url: "https://udemy.com/course/machine-learning-a-z-ai-python-r",
+    headline: "Learn to create machine learning algorithms in Python and R. Data science, deep learning, and AI fundamentals",
+    image_480x270: "https://placehold.co/480x270/D0D8E8/4F5F6B?text=ML",
+    visible_instructors: [{ display_name: "Kirill Eremenko" }],
+    content_info: "42 hours total",
+    instructional_level: "All Levels",
+    primary_category: { title: "Data Science" },
+    estimated_content_length: 151200,
+  },
+  {
+    id: 209,
+    title: "Cybersecurity Fundamentals: Protect Your Data",
+    url: "https://udemy.com/course/cybersecurity-fundamentals",
+    headline: "Learn essential cybersecurity skills. Network security, ethical hacking, threat detection, and risk assessment",
+    image_480x270: "https://placehold.co/480x270/D8D8E0/4F4F6B?text=Cybersec",
+    visible_instructors: [{ display_name: "Nathan House" }],
+    content_info: "16 hours total",
+    instructional_level: "Beginner",
+    primary_category: { title: "IT & Software" },
+    estimated_content_length: 57600,
+  },
+  {
+    id: 210,
+    title: "Agile Scrum: Complete Guide for Teams",
+    url: "https://udemy.com/course/agile-scrum-complete-guide",
+    headline: "Master Agile and Scrum methodologies. Sprint planning, retrospectives, user stories, and team facilitation",
+    image_480x270: "https://placehold.co/480x270/E8D8E8/6B4F6B?text=Scrum",
+    visible_instructors: [{ display_name: "Paul Ashun" }],
+    content_info: "6 hours total",
+    instructional_level: "All Levels",
+    primary_category: { title: "Business" },
+    estimated_content_length: 21600,
+  },
 ];
 
 const MOCK_LEARNING_PATHS: UdemyLearningPath[] = [
@@ -250,12 +370,15 @@ export class UdemyClient {
 
     if (params.search) {
       const query = params.search.toLowerCase();
-      filtered = filtered.filter(
+      const matched = filtered.filter(
         (c) =>
           c.title.toLowerCase().includes(query) ||
           c.headline.toLowerCase().includes(query) ||
           c.primary_category?.title.toLowerCase().includes(query),
       );
+      if (matched.length > 0) {
+        filtered = matched;
+      }
     }
 
     if (params.category) {

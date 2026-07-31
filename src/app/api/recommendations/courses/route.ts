@@ -27,32 +27,33 @@ export async function GET(request: NextRequest) {
     let courses: Awaited<ReturnType<typeof learningService.searchCourses>>["data"] = [];
 
     if (user.employeeSkills.length > 0) {
+      const searchQueries = user.employeeSkills.map((es) => `Advanced ${es.skill.name}`);
+      searchQueries.push(...user.employeeSkills.map((es) => es.skill.name));
+
+      const uniqueQueries = [...new Set(searchQueries)];
       const results = await Promise.all(
-        user.employeeSkills.map((es) =>
-          learningService.searchCourses({ query: es.skill.name, pageSize: 2 }),
+        uniqueQueries.slice(0, 3).map((q) =>
+          learningService.searchCourses({ query: q, pageSize: 1 }),
         ),
       );
 
       const seen = new Set<string>();
       for (const result of results) {
         for (const course of result.data) {
-          if (!seen.has(course.id)) {
+          if (!seen.has(course.id) && courses.length < 3) {
             seen.add(course.id);
             courses.push(course);
           }
         }
       }
-    } else {
-      const departmentQuery = user.department
-        ? `${user.department.name} courses`
-        : "General courses";
+    }
 
-      const [departmentResults, leadershipResults] = await Promise.all([
-        learningService.searchCourses({ query: departmentQuery, pageSize: 3 }),
-        learningService.searchCourses({ query: "Leadership", pageSize: 2 }),
-      ]);
-
-      courses = [...departmentResults.data, ...leadershipResults.data];
+    if (courses.length === 0 && user.department?.name) {
+      const results = await learningService.searchCourses({
+        query: `${user.department.name} professional development`,
+        pageSize: 3,
+      });
+      courses = results.data.slice(0, 3);
     }
 
     return NextResponse.json({ success: true, data: courses });

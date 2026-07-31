@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireAuth } from "@/lib/authorize";
 import { handleError } from "@/lib/error-handler";
+import { notificationService } from "@/features/notifications/services/notification.service";
 
 export async function POST(request: NextRequest) {
   try {
@@ -38,9 +39,12 @@ export async function POST(request: NextRequest) {
     }
 
     let resourceIdsToEnroll: string[] = [];
+    let assignmentName = "learning";
 
     if (learningResourceId) {
       resourceIdsToEnroll = [learningResourceId];
+      const resource = await db.learningResource.findUnique({ where: { id: learningResourceId } });
+      if (resource) assignmentName = resource.title;
     } else if (learningPlanId) {
       const plan = await db.learningPlan.findUnique({ where: { id: learningPlanId } });
 
@@ -51,10 +55,12 @@ export async function POST(request: NextRequest) {
         );
       }
 
+      assignmentName = plan.title;
       resourceIdsToEnroll = JSON.parse(plan.courseIds) as string[];
     }
 
     let createdCount = 0;
+    const notifiedUsers = new Set<string>();
 
     for (const userId of userIds) {
       for (const resourceId of resourceIdsToEnroll) {
@@ -74,6 +80,16 @@ export async function POST(request: NextRequest) {
         });
 
         createdCount++;
+      }
+
+      if (!notifiedUsers.has(userId)) {
+        notifiedUsers.add(userId);
+        await notificationService.createNotification(
+          userId,
+          "New Learning Assigned",
+          `You have been assigned "${assignmentName}". Check your learning dashboard to get started.`,
+          "INFO",
+        );
       }
     }
 

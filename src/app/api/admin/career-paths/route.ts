@@ -2,11 +2,19 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/authorize";
 import { careerService } from "@/features/career/services/career.service";
 import { createCareerPathSchema } from "@/features/career/validations/career.schema";
+import { db } from "@/lib/db";
+
+async function resolveCompanyId(userId: string): Promise<string> {
+  const user = await db.user.findUnique({ where: { id: userId }, select: { companyId: true } });
+  if (!user?.companyId) throw new Error("User does not belong to a company");
+  return user.companyId;
+}
 
 export async function GET() {
   try {
-    await requireAuth();
-    const paths = await careerService.getCareerPaths();
+    const session = await requireAuth();
+    const companyId = await resolveCompanyId((session.user as { id: string }).id);
+    const paths = await careerService.getCareerPaths(companyId);
     return NextResponse.json({ success: true, data: paths });
   } catch (error: any) {
     return NextResponse.json(
