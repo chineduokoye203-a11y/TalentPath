@@ -17,7 +17,7 @@ function createPrisma() {
   return new PrismaClient({ adapter });
 }
 
-export function getDb() {
+function getDb() {
   if (!globalForPrisma.prisma) {
     globalForPrisma.prisma = createPrisma();
   }

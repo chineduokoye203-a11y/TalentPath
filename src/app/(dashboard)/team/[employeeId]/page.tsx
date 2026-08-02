@@ -464,12 +464,12 @@ export default function EmployeeProfilePage() {
 
         <Card>
           <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-            <div
+              <div
               style={{
                 width: 40,
                 height: 40,
                 borderRadius: "var(--radius-md)",
-                background: "var(--color-warning)",
+                background: "var(--color-error)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -504,12 +504,12 @@ export default function EmployeeProfilePage() {
 
         <Card>
           <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-            <div
+              <div
               style={{
                 width: 40,
                 height: 40,
                 borderRadius: "var(--radius-md)",
-                background: "var(--color-success)",
+                background: "#22c55e",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",

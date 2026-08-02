@@ -56,11 +56,13 @@ export const invitationService = {
     const inviter = await db.user.findUnique({ where: { id: createdBy }, include: { company: true } });
     const companyName = inviter?.company?.name || "Your Company";
 
-    await sendEmail(
+    sendEmail(
       invitation.email,
       "You're invited to TalentPath",
       renderInvitationEmail(invitation.firstName, invitation.token, invitation.role, companyName),
-    );
+    ).catch((err) => {
+      console.error("Failed to send invitation email:", err);
+    });
 
     return invitation;
   },

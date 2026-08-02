@@ -22,25 +22,31 @@ function createTransport() {
 
 const fromAddress = env.SMTP_FROM || '"TalentPath" <noreply@talentpath.com>';
 
-export async function sendEmail(to: string, subject: string, html: string): Promise<void> {
+export async function sendEmail(to: string, subject: string, html: string): Promise<boolean> {
   if (!env.ENABLE_EMAIL_NOTIFICATIONS) {
     logger("info", "Email notifications disabled. Skipping email.", { to, subject });
-    return;
+    return false;
   }
 
   const transport = createTransport();
   if (!transport) {
     logger("warn", "SMTP not configured. Email not sent.", { to, subject });
-    return;
+    return false;
   }
 
   try {
     await transport.sendMail({ from: fromAddress, to, subject, html });
     logger("info", "Email sent", { to, subject });
+    return true;
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    const errorCode = error instanceof Error ? (error as any).code : undefined;
-    logger("error", "Failed to send email", { to, subject, error: errorMessage, code: errorCode });
+    console.error("SMTP Error — failed to send email:", error);
+    logger("error", "Failed to send email", {
+      to,
+      subject,
+      error: error instanceof Error ? error.message : String(error),
+      code: error instanceof Error ? (error as any).code : undefined,
+    });
+    return false;
   }
 }
 
